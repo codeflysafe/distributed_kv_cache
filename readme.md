@@ -9,4 +9,9 @@
 
 ## Projects
 1. [distributed_cache](distributed_cache/README.md)
+2. [go_rpc](go_rpc/readme.md)
+3. [go_raft](go_raft/readme.md)
 
+## TODO
+- [ ] 一致性hash算法
+- [ ] go channel post
