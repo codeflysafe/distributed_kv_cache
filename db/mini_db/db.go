@@ -194,3 +194,10 @@ func (db *MiniDB) Close() error {
 	}
 	return nil
 }
+
+func (db *MiniDB) Sync() error {
+	if db.dbFile == nil {
+		return fmt.Errorf("miniDB not init")
+	}
+	return db.dbFile.File.Sync()
+}

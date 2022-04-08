@@ -38,7 +38,7 @@ func TestMiniDB_Get(t *testing.T) {
 		t.Error(err)
 	}
 	defer db.Close()
-	for i := 0; i < 10; i++ {
+	for i := 1; i < 10; i++ {
 		key := []byte(fmt.Sprintf("key%d", i))
 		value := fmt.Sprintf("value%d", i)
 		v, err := db.Get(key)
