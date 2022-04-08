@@ -4,7 +4,9 @@
 
 ## Go Based Content
 > go 基础知识
-1. [go channel](go-notes/channel.md)
+
+1. [go基础](go-notes/1-基础.md)
+2. [go channel](go-notes/channel.md)
 
 
 ## Projects
@@ -15,3 +17,4 @@
 ## TODO
 - [ ] 一致性hash算法
 - [ ] go channel post
+
