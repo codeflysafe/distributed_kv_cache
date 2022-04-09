@@ -13,7 +13,7 @@ const (
 )
 
 // 数据库的定义
-type MiniDB struct {
+type BitcaskDB struct {
 	io.Closer
 	indexes  map[string]int64 // key 与 offset 的索引
 	indexes2 map[string]int64 // merge 过程中使用的hash 表
@@ -25,7 +25,7 @@ type MiniDB struct {
 }
 
 // 恢复数据，从磁盘中家在数据
-func (db *MiniDB) restore() error {
+func (db *BitcaskDB) restore() error {
 	// 为空无需加载
 	if db.dbFile.OffSet == 0 {
 		return nil
@@ -50,8 +50,8 @@ func (db *MiniDB) restore() error {
 }
 
 // Open 开启一个数据库实例
-func Open(dirPath string) (db *MiniDB, err error) {
-	db = &MiniDB{
+func Open(dirPath string) (db *BitcaskDB, err error) {
+	db = &BitcaskDB{
 		dirPath: dirPath,
 		indexes: make(map[string]int64, 10),
 		ratio:   Ratio,
@@ -67,7 +67,7 @@ func Open(dirPath string) (db *MiniDB, err error) {
 }
 
 // 放入
-func (db *MiniDB) Put(key, value []byte) (err error) {
+func (db *BitcaskDB) Put(key, value []byte) (err error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	offset, err := db.dbFile.Write(NewEntry(key, value, PUT))
@@ -79,7 +79,7 @@ func (db *MiniDB) Put(key, value []byte) (err error) {
 }
 
 // 查找
-func (db *MiniDB) Get(key []byte) (value []byte, err error) {
+func (db *BitcaskDB) Get(key []byte) (value []byte, err error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 	var entry *Entry
@@ -95,7 +95,7 @@ func (db *MiniDB) Get(key []byte) (value []byte, err error) {
 	return
 }
 
-func (db *MiniDB) Del(key []byte) (err error) {
+func (db *BitcaskDB) Del(key []byte) (err error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
@@ -114,7 +114,7 @@ func (db *MiniDB) Del(key []byte) (err error) {
 	return nil
 }
 
-func (db *MiniDB) scanFiles(ch chan<- *Entry) error {
+func (db *BitcaskDB) scanFiles(ch chan<- *Entry) error {
 
 	// 关闭 ch
 	defer close(ch)
@@ -135,7 +135,7 @@ func (db *MiniDB) scanFiles(ch chan<- *Entry) error {
 	return nil
 }
 
-func (db *MiniDB) Merge() error {
+func (db *BitcaskDB) Merge() error {
 	//db.mu.Lock()
 	//defer db.mu.Unlock()
 	// 新设一个chan
@@ -178,7 +178,7 @@ func (db *MiniDB) Merge() error {
 
 }
 
-func (db *MiniDB) ListKeys() (keys [][]byte, err error) {
+func (db *BitcaskDB) ListKeys() (keys [][]byte, err error) {
 	db.mu.RLock()
 	db.mu.RUnlock()
 	keys = make([][]byte, db.count)
@@ -188,16 +188,16 @@ func (db *MiniDB) ListKeys() (keys [][]byte, err error) {
 	return
 }
 
-func (db *MiniDB) Close() error {
+func (db *BitcaskDB) Close() error {
 	if db.dbFile.File != nil {
 		return db.dbFile.File.Close()
 	}
 	return nil
 }
 
-func (db *MiniDB) Sync() error {
+func (db *BitcaskDB) Sync() error {
 	if db.dbFile == nil {
-		return fmt.Errorf("miniDB not init")
+		return fmt.Errorf("BitcaskDB not init")
 	}
 	return db.dbFile.File.Sync()
 }

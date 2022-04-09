@@ -18,7 +18,7 @@ func TestOpen(t *testing.T) {
 	t.Log(db)
 }
 
-func TestMiniDB_Put(t *testing.T) {
+func TestBitcaskDB_Put(t *testing.T) {
 	db, err := Open(path)
 	if err != nil {
 		t.Error(err)
@@ -32,7 +32,7 @@ func TestMiniDB_Put(t *testing.T) {
 	}
 }
 
-func TestMiniDB_Get(t *testing.T) {
+func TestBitcaskDB_Get(t *testing.T) {
 	db, err := Open(path)
 	if err != nil {
 		t.Error(err)
@@ -53,7 +53,7 @@ func TestMiniDB_Get(t *testing.T) {
 	}
 }
 
-func TestMiniDB_Del(t *testing.T) {
+func TestBitcaskDB_Del(t *testing.T) {
 	db, err := Open(path)
 	if err != nil {
 		t.Error(err)
@@ -73,7 +73,7 @@ func TestMiniDB_Del(t *testing.T) {
 	println(keys)
 }
 
-func TestMiniDB_Merge(t *testing.T) {
+func TestBitcaskDB_Merge(t *testing.T) {
 	db, err := Open(path)
 	if err != nil {
 		t.Error(err)

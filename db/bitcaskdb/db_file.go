@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	FileNmae      = "minidb.data"
-	MergeFileName = "minidb.db.merge"
+	FileNmae      = "BitcaskDB.data"
+	MergeFileName = "BitcaskDB.db.merge"
 )
 
 type DBFile struct {
