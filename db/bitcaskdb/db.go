@@ -1,4 +1,4 @@
-package mini_db
+package bitcaskdb
 
 import (
 	"fmt"
