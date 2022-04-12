@@ -10,7 +10,7 @@
 1. [go基础](go-notes/chapter_1/1-基础.md)
 2. [go 基本数据结构](go-notes/chapter_3/readme.md)
 3. [go 并发编程](go-notes/chapter_4/readme.md)
-4. [go 内存逃逸分析](go-notes/chaper_2/内存逃逸.md)
+4. [go 内存逃逸分析](go-notes/chapter_2/内存逃逸.md)
 
 ## Projects
 1. [distributed_cache](distributed_cache/README.md)

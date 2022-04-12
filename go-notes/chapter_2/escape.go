@@ -68,6 +68,13 @@ func lessThanStack() {
 }
 
 // 8192 KB
+func more32ThanStack() {
+	var xm3 [5000]int64 // 40KB
+	//fmt.Println(unsafe.Sizeof(xm))
+	xm3[0] = 0
+}
+
+// 8192 KB
 func moreThanStack() {
 	var xm [2000000]int64 // 16MB
 	//fmt.Println(unsafe.Sizeof(xm))
@@ -111,6 +118,8 @@ func main() {
 	// 5.栈空间不足引发逃逸
 	lessThanStack()
 	moreThanStack()
+	// 超过32KB
+	more32ThanStack()
 
 	// 6.变量大小不确定
 	unknownum()

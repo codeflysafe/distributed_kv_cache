@@ -1,0 +1,161 @@
+"".main STEXT size=430 args=0x0 locals=0x88
+	0x0000 00000 (slice_.go:7)	TEXT	"".main(SB), ABIInternal, $136-0
+	0x0000 00000 (slice_.go:7)	MOVQ	(TLS), CX
+	0x0009 00009 (slice_.go:7)	LEAQ	-8(SP), AX
+	0x000e 00014 (slice_.go:7)	CMPQ	AX, 16(CX)
+	0x0012 00018 (slice_.go:7)	PCDATA	$0, $-2
+	0x0012 00018 (slice_.go:7)	JLS	420
+	0x0018 00024 (slice_.go:7)	PCDATA	$0, $-1
+	0x0018 00024 (slice_.go:7)	SUBQ	$136, SP
+	0x001f 00031 (slice_.go:7)	MOVQ	BP, 128(SP)
+	0x0027 00039 (slice_.go:7)	LEAQ	128(SP), BP
+	0x002f 00047 (slice_.go:7)	FUNCDATA	$0, gclocals·69c1753bd5f81501d95132d08af04464(SB)
+	0x002f 00047 (slice_.go:7)	FUNCDATA	$1, gclocals·9fb7f0986f647f17cb53dda1484e0f7a(SB)
+	0x002f 00047 (slice_.go:9)	XORPS	X0, X0
+	0x0032 00050 (slice_.go:9)	MOVUPS	X0, ""..autotmp_4+88(SP)
+	0x0037 00055 (slice_.go:9)	MOVUPS	X0, ""..autotmp_4+104(SP)
+	0x003c 00060 (slice_.go:11)	PCDATA	$1, $0
+	0x003c 00060 (slice_.go:11)	NOP
+	0x0040 00064 (slice_.go:11)	CALL	runtime.printlock(SB)
+	0x0045 00069 (slice_.go:11)	MOVQ	$8, (SP)
+	0x004d 00077 (slice_.go:11)	CALL	runtime.printuint(SB)
+	0x0052 00082 (slice_.go:11)	CALL	runtime.printsp(SB)
+	0x0057 00087 (slice_.go:11)	MOVQ	$24, (SP)
+	0x005f 00095 (slice_.go:11)	NOP
+	0x0060 00096 (slice_.go:11)	CALL	runtime.printuint(SB)
+	0x0065 00101 (slice_.go:11)	CALL	runtime.printsp(SB)
+	0x006a 00106 (slice_.go:11)	MOVQ	$4, (SP)
+	0x0072 00114 (slice_.go:11)	CALL	runtime.printint(SB)
+	0x0077 00119 (slice_.go:11)	CALL	runtime.printsp(SB)
+	0x007c 00124 (slice_.go:11)	MOVQ	$4, (SP)
+	0x0084 00132 (slice_.go:11)	CALL	runtime.printint(SB)
+	0x0089 00137 (slice_.go:11)	CALL	runtime.printnl(SB)
+	0x008e 00142 (slice_.go:11)	CALL	runtime.printunlock(SB)
+	0x0093 00147 (slice_.go:11)	XORL	AX, AX
+	0x0095 00149 (slice_.go:11)	MOVL	$4, CX
+	0x009a 00154 (slice_.go:11)	MOVL	$4, DX
+	0x009f 00159 (slice_.go:9)	LEAQ	""..autotmp_4+88(SP), BX
+	0x00a4 00164 (slice_.go:12)	JMP	300
+	0x00a9 00169 (slice_.go:13)	MOVQ	BX, "".nums.ptr+120(SP)
+	0x00ae 00174 (slice_.go:13)	MOVQ	SI, "".nums.len+64(SP)
+	0x00b3 00179 (slice_.go:13)	MOVQ	CX, "".nums.cap+72(SP)
+	0x00b8 00184 (slice_.go:13)	MOVQ	AX, (BX)(DX*8)
+	0x00bc 00188 (slice_.go:14)	PCDATA	$1, $1
+	0x00bc 00188 (slice_.go:14)	NOP
+	0x00c0 00192 (slice_.go:14)	CALL	runtime.printlock(SB)
+	0x00c5 00197 (slice_.go:14)	MOVQ	$8, (SP)
+	0x00cd 00205 (slice_.go:14)	CALL	runtime.printuint(SB)
+	0x00d2 00210 (slice_.go:14)	CALL	runtime.printsp(SB)
+	0x00d7 00215 (slice_.go:14)	MOVQ	$24, (SP)
+	0x00df 00223 (slice_.go:14)	NOP
+	0x00e0 00224 (slice_.go:14)	CALL	runtime.printuint(SB)
+	0x00e5 00229 (slice_.go:14)	CALL	runtime.printsp(SB)
+	0x00ea 00234 (slice_.go:14)	MOVQ	"".nums.len+64(SP), AX
+	0x00ef 00239 (slice_.go:14)	MOVQ	AX, (SP)
+	0x00f3 00243 (slice_.go:14)	CALL	runtime.printint(SB)
+	0x00f8 00248 (slice_.go:14)	CALL	runtime.printsp(SB)
+	0x00fd 00253 (slice_.go:14)	MOVQ	"".nums.cap+72(SP), AX
+	0x0102 00258 (slice_.go:14)	MOVQ	AX, (SP)
+	0x0106 00262 (slice_.go:14)	CALL	runtime.printint(SB)
+	0x010b 00267 (slice_.go:14)	CALL	runtime.printnl(SB)
+	0x0110 00272 (slice_.go:14)	CALL	runtime.printunlock(SB)
+	0x0115 00277 (slice_.go:12)	MOVQ	"".i+80(SP), AX
+	0x011a 00282 (slice_.go:12)	INCQ	AX
+	0x011d 00285 (slice_.go:13)	MOVQ	"".nums.cap+72(SP), CX
+	0x0122 00290 (slice_.go:13)	MOVQ	"".nums.len+64(SP), DX
+	0x0127 00295 (slice_.go:13)	MOVQ	"".nums.ptr+120(SP), BX
+	0x012c 00300 (slice_.go:12)	CMPQ	AX, $10
+	0x0130 00304 (slice_.go:12)	JGE	404
+	0x0132 00306 (slice_.go:12)	MOVQ	AX, "".i+80(SP)
+	0x0137 00311 (slice_.go:13)	LEAQ	1(DX), SI
+	0x013b 00315 (slice_.go:13)	NOP
+	0x0140 00320 (slice_.go:13)	CMPQ	CX, SI
+	0x0143 00323 (slice_.go:13)	JCC	169
+	0x0149 00329 (slice_.go:13)	MOVQ	DX, "".nums.len+64(SP)
+	0x014e 00334 (slice_.go:13)	LEAQ	type.int(SB), AX
+	0x0155 00341 (slice_.go:13)	MOVQ	AX, (SP)
+	0x0159 00345 (slice_.go:13)	MOVQ	BX, 8(SP)
+	0x015e 00350 (slice_.go:13)	MOVQ	DX, 16(SP)
+	0x0163 00355 (slice_.go:13)	MOVQ	CX, 24(SP)
+	0x0168 00360 (slice_.go:13)	MOVQ	SI, 32(SP)
+	0x016d 00365 (slice_.go:13)	PCDATA	$1, $0
+	0x016d 00365 (slice_.go:13)	CALL	runtime.growslice(SB)
+	0x0172 00370 (slice_.go:13)	MOVQ	40(SP), BX
+	0x0177 00375 (slice_.go:13)	MOVQ	48(SP), AX
+	0x017c 00380 (slice_.go:13)	MOVQ	56(SP), CX
+	0x0181 00385 (slice_.go:13)	LEAQ	1(AX), SI
+	0x0185 00389 (slice_.go:13)	MOVQ	"".i+80(SP), AX
+	0x018a 00394 (slice_.go:13)	MOVQ	"".nums.len+64(SP), DX
+	0x018f 00399 (slice_.go:13)	JMP	169
+	0x0194 00404 (slice_.go:12)	PCDATA	$1, $-1
+	0x0194 00404 (slice_.go:12)	MOVQ	128(SP), BP
+	0x019c 00412 (slice_.go:12)	ADDQ	$136, SP
+	0x01a3 00419 (slice_.go:12)	RET
+	0x01a4 00420 (slice_.go:12)	NOP
+	0x01a4 00420 (slice_.go:7)	PCDATA	$1, $-1
+	0x01a4 00420 (slice_.go:7)	PCDATA	$0, $-2
+	0x01a4 00420 (slice_.go:7)	CALL	runtime.morestack_noctxt(SB)
+	0x01a9 00425 (slice_.go:7)	PCDATA	$0, $-1
+	0x01a9 00425 (slice_.go:7)	JMP	0
+	0x0000 65 48 8b 0c 25 00 00 00 00 48 8d 44 24 f8 48 3b  eH..%....H.D$.H;
+	0x0010 41 10 0f 86 8c 01 00 00 48 81 ec 88 00 00 00 48  A.......H......H
+	0x0020 89 ac 24 80 00 00 00 48 8d ac 24 80 00 00 00 0f  ..$....H..$.....
+	0x0030 57 c0 0f 11 44 24 58 0f 11 44 24 68 0f 1f 40 00  W...D$X..D$h..@.
+	0x0040 e8 00 00 00 00 48 c7 04 24 08 00 00 00 e8 00 00  .....H..$.......
+	0x0050 00 00 e8 00 00 00 00 48 c7 04 24 18 00 00 00 90  .......H..$.....
+	0x0060 e8 00 00 00 00 e8 00 00 00 00 48 c7 04 24 04 00  ..........H..$..
+	0x0070 00 00 e8 00 00 00 00 e8 00 00 00 00 48 c7 04 24  ............H..$
+	0x0080 04 00 00 00 e8 00 00 00 00 e8 00 00 00 00 e8 00  ................
+	0x0090 00 00 00 31 c0 b9 04 00 00 00 ba 04 00 00 00 48  ...1...........H
+	0x00a0 8d 5c 24 58 e9 83 00 00 00 48 89 5c 24 78 48 89  .\$X.....H.\$xH.
+	0x00b0 74 24 40 48 89 4c 24 48 48 89 04 d3 0f 1f 40 00  t$@H.L$HH.....@.
+	0x00c0 e8 00 00 00 00 48 c7 04 24 08 00 00 00 e8 00 00  .....H..$.......
+	0x00d0 00 00 e8 00 00 00 00 48 c7 04 24 18 00 00 00 90  .......H..$.....
+	0x00e0 e8 00 00 00 00 e8 00 00 00 00 48 8b 44 24 40 48  ..........H.D$@H
+	0x00f0 89 04 24 e8 00 00 00 00 e8 00 00 00 00 48 8b 44  ..$..........H.D
+	0x0100 24 48 48 89 04 24 e8 00 00 00 00 e8 00 00 00 00  $HH..$..........
+	0x0110 e8 00 00 00 00 48 8b 44 24 50 48 ff c0 48 8b 4c  .....H.D$PH..H.L
+	0x0120 24 48 48 8b 54 24 40 48 8b 5c 24 78 48 83 f8 0a  $HH.T$@H.\$xH...
+	0x0130 7d 62 48 89 44 24 50 48 8d 72 01 0f 1f 44 00 00  }bH.D$PH.r...D..
+	0x0140 48 39 f1 0f 83 60 ff ff ff 48 89 54 24 40 48 8d  H9...`...H.T$@H.
+	0x0150 05 00 00 00 00 48 89 04 24 48 89 5c 24 08 48 89  .....H..$H.\$.H.
+	0x0160 54 24 10 48 89 4c 24 18 48 89 74 24 20 e8 00 00  T$.H.L$.H.t$ ...
+	0x0170 00 00 48 8b 5c 24 28 48 8b 44 24 30 48 8b 4c 24  ..H.\$(H.D$0H.L$
+	0x0180 38 48 8d 70 01 48 8b 44 24 50 48 8b 54 24 40 e9  8H.p.H.D$PH.T$@.
+	0x0190 15 ff ff ff 48 8b ac 24 80 00 00 00 48 81 c4 88  ....H..$....H...
+	0x01a0 00 00 00 c3 e8 00 00 00 00 e9 52 fe ff ff        ..........R...
+	rel 5+4 t=17 TLS+0
+	rel 65+4 t=8 runtime.printlock+0
+	rel 78+4 t=8 runtime.printuint+0
+	rel 83+4 t=8 runtime.printsp+0
+	rel 97+4 t=8 runtime.printuint+0
+	rel 102+4 t=8 runtime.printsp+0
+	rel 115+4 t=8 runtime.printint+0
+	rel 120+4 t=8 runtime.printsp+0
+	rel 133+4 t=8 runtime.printint+0
+	rel 138+4 t=8 runtime.printnl+0
+	rel 143+4 t=8 runtime.printunlock+0
+	rel 193+4 t=8 runtime.printlock+0
+	rel 206+4 t=8 runtime.printuint+0
+	rel 211+4 t=8 runtime.printsp+0
+	rel 225+4 t=8 runtime.printuint+0
+	rel 230+4 t=8 runtime.printsp+0
+	rel 244+4 t=8 runtime.printint+0
+	rel 249+4 t=8 runtime.printsp+0
+	rel 263+4 t=8 runtime.printint+0
+	rel 268+4 t=8 runtime.printnl+0
+	rel 273+4 t=8 runtime.printunlock+0
+	rel 337+4 t=16 type.int+0
+	rel 366+4 t=8 runtime.growslice+0
+	rel 421+4 t=8 runtime.morestack_noctxt+0
+go.cuinfo.packagename. SDWARFINFO dupok size=0
+	0x0000 6d 61 69 6e                                      main
+""..inittask SNOPTRDATA size=24
+	0x0000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+	0x0010 00 00 00 00 00 00 00 00                          ........
+type..importpath.unsafe. SRODATA dupok size=9
+	0x0000 00 00 06 75 6e 73 61 66 65                       ...unsafe
+gclocals·69c1753bd5f81501d95132d08af04464 SRODATA dupok size=8
+	0x0000 02 00 00 00 00 00 00 00                          ........
+gclocals·9fb7f0986f647f17cb53dda1484e0f7a SRODATA dupok size=10
+	0x0000 02 00 00 00 01 00 00 00 00 01                    ..........
