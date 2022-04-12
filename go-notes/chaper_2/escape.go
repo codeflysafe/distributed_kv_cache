@@ -2,44 +2,79 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"reflect"
 	"unsafe"
 )
 
-type A struct {
-	S *string
+type Z struct {
+	z unsafe.Pointer
 }
 
-func (f *A) String() string {
-	return *f.S
+type Y struct {
 }
 
-type ATrick struct {
-	S unsafe.Pointer
+type X struct {
+	name string
+	id   int
+	p    *Y
 }
 
-func (f *ATrick) String() string {
-	return *(*string)(f.S)
+func getInt() int {
+	a := 55
+	return a
 }
 
-func NewA(s string) A {
-	return A{S: &s}
+func foo() *int {
+	a1 := 55
+	return &a1
 }
 
-func NewATrick(s string) ATrick {
-	return ATrick{S: noescape(unsafe.Pointer(&s))}
+func foo2() *X {
+	x2 := X{
+		name: "hsj",
+		id:   12,
+	}
+	return &x2
 }
 
-func noescape(p unsafe.Pointer) unsafe.Pointer {
-	x := uintptr(p)
-	return unsafe.Pointer(x ^ 0)
+func foo3() *X {
+	xf2 := &X{
+		name: "hsj",
+		id:   12,
+	}
+	return xf2
 }
 
-func esacpe() *int {
-	x1 := 12
-	return &x1
+func foo4() *X {
+	xf4 := new(X)
+	return xf4
 }
 
+func foo5() {
+	_ = new(X)
+}
+
+func reflectv() {
+	xv := X{}
+	xc := interface{}(xv)
+	t := reflect.TypeOf(xc)
+	_ = t.Size()
+}
+
+// 8192 KB
+func lessThanStack() {
+	var xs [100]int64 // 800B
+	xs[0] = 0
+}
+
+// 8192 KB
+func moreThanStack() {
+	var xm [2000000]int64 // 16MB
+	//fmt.Println(unsafe.Sizeof(xm))
+	xm[0] = 0
+}
+
+// 闭包产生的逃逸
 func Increase() func() int {
 	n := 0
 	return func() int {
@@ -48,76 +83,45 @@ func Increase() func() int {
 	}
 }
 
-func LessThan8192() {
-	nums := make([]int, 100) // = 64KB
-	for i := 0; i < len(nums); i++ {
-		nums[i] = rand.Int()
-	}
-}
+func unknownum() {
+	num := 12
+	cn := make([]int, num)
+	cn = append(cn, 1)
 
-func MoreThan8192() {
-	nums := make([]int, 1000000) // = 64KB
-	for i := 0; i < len(nums); i++ {
-		nums[i] = rand.Int()
-	}
-}
-
-func F() func() int {
-	a, b := 0, 1
-	return func() int {
-		a, b = b, a+b
-		return a
-	}
-}
-
-func NonConstant() {
-	number := 10
-	s := make([]int, number)
-	for i := 0; i < len(s); i++ {
-		s[i] = i
-	}
+	cns := make([]int, 121)
+	cns = append(cns, 123)
 }
 
 func main() {
-	s := "hello"
+	b := getInt()
+	var c = b
+	// 1. 由于fmt.Println导致的内存逃逸
+	fmt.Println(c)
 
-	f1 := NewA(s)
-	f2 := NewATrick(s)
-	s1 := f1.String()
-	s2 := f2.String()
+	// 2. 函数返回指向栈内对象的指针，或者说是参数泄漏，延长了指针对象的生命周期。
+	foo()
 
-	//函数返回局部指针变量
-	esacpe()
-	_ = s1 + s2
+	// 3. 涉及到反射使用
+	reflectv()
+	// 4. 被已经逃逸的变量引用的指针，一定发生逃逸
+	x3 := foo2()
+	y := Y{}
+	x3.p = &y
 
-	//  interface类型逃逸
-	str := "wo zai nali"
-	fmt.Println(str)
+	// 5.栈空间不足引发逃逸
+	lessThanStack()
+	moreThanStack()
 
-	in := Increase()
-	fmt.Println(in()) // 1
+	// 6.变量大小不确定
+	unknownum()
 
-	// 变量大小不确定及栈空间不足引发逃逸
-	NonConstant()
-	MoreThan8192()
-	LessThan8192()
+	_ = Z{unsafe.Pointer(&Y{})}
+	p2 := foo3()
+	p2.name = "xws"
 
-	var nums [10]int
-	nums[0] = 1
+	foo4()
 
-	var slices []int
-	slices = append(slices, 0)
-
-	num2 := make([]int, 1, 12)
-	num2 = append(num2, 1)
-
-	l := 20
-	c := make([]int, 0, l) // 堆 动态分配不定空间 逃逸
-	c = append(c, 12)
-
-	f := F()
-
-	for i := 0; i < 10; i++ {
-		f()
-	}
+	foo5()
+	// 9. 闭包发生逃逸
+	Increase()
 }
