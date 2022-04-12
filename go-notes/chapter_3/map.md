@@ -87,5 +87,9 @@ buckets 编号就是桶编号，当两个不同的 key 落在同一个桶中，�
 这里参考曹大 github 博客里的一张图，原图是 ascii 图，geek 味十足，可以从参考资料找到曹大的博客，推荐大家去看看。
 ![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412172551.png)
 
+### 扩容
+1. loadfactor 超过阈值 6.5
+2. too many overflow buckets, overflow buckets 过多 B > 15
+
 ## Reference
 https://qcrao91.gitbook.io/go/map/map-de-di-ceng-shi-xian-yuan-li-shi-shi-mo
