@@ -35,4 +35,4 @@ type waitq struct {
 }
 ```
 
-![img.png](imgs/img.png)
+![img.png](../imgs/img.png)
