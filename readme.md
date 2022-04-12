@@ -1,5 +1,7 @@
 # Everything of Go
 
+![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412141107.png)
+
 关于`go`的学习笔记和一些实践记录
 
 ## Go Based Content
