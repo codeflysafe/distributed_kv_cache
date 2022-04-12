@@ -64,4 +64,15 @@ func main() {
 	fmt.Println(k2, len(k2), cap(k2))
 	fmt.Println(nums, len(nums), cap(nums))
 
+	fmt.Println("test append nil-------------- ")
+	//nil
+	ch := make([]unsafe.Pointer, 0)
+	ch = append(ch, nil)
+	// 	if et.size == 0 {
+	//		// append should not create a slice with nil pointer but non-zero len.
+	//		// We assume that append doesn't need to preserve old.array in this case.
+	//		return slice{unsafe.Pointer(&zerobase), old.len, cap}
+	//	}
+	fmt.Println(ch, unsafe.Sizeof(ch), len(ch), cap(ch))
+	fmt.Println("test append nil end-------------- ")
 }
