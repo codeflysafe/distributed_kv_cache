@@ -1,24 +1,16 @@
-# string
+package main
 
-```golang
-// StringHeader is the runtime representation of a string.
-// It cannot be used safely or portably and its representation may
-// change in a later release.
-// Moreover, the Data field is not sufficient to guarantee the data
-// it references will not be garbage collected, so programs must keep
-// a separate, correctly typed pointer to the underlying data.
-type StringHeader struct {
-	Data uintptr
-	Len  int
+import (
+	"fmt"
+	"reflect"
+	"strings"
+	"unsafe"
+)
+
+func add(ptr unsafe.Pointer, offset int) unsafe.Pointer {
+	return unsafe.Pointer(uintptr(ptr) + uintptr(offset))
 }
-```
 
-与 [slice](slice.md) 类似，它包含一个指向数组的指针`Data`和一个长度`len`来表示当前字符串的长度
-
-![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412163221.png)
-
-### 查看底层结构
-```go
 func pointer() {
 	var str string
 	str = "123123"
@@ -28,29 +20,14 @@ func pointer() {
 	// 访问第一个元素
 	ptr := unsafe.Pointer(p.Data)
 	fmt.Println(*(*byte)(ptr), '1')
-    // 转化为底层数组
+
 	arr := (*[5]byte)(ptr)
 	fmt.Println(arr)
 
 	// 访问数组的第i个元素 地址寻址 按照字
 	fmt.Println(arr[3], *(*byte)(add(ptr, 3)))
 }
-```
 
-执行结果如下
-```shell
-&{17614562 6}
-49 49
-&[49 50 51 49 50]
-49 49
-```
-
-### 不可变
-string 是不可变的，所有对string自身的修改都是新创建了一个字符串
-
-![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412165506.png)
-
-```go
 func change() {
 	var str, str2, str3, str4 string
 	str = "123123"
@@ -104,25 +81,8 @@ func change() {
 	// buf := make([]byte, len(b.buf), 2*cap(b.buf)+n) 扩容
 	fmt.Println(build.String(), build.Cap(), build.Len())
 }
-```
 
-结果如下
-
-```shell
-17618242 17618242 17618243
-&[49 50 51 49 50] 123123 6
-&[49 50 51] 123 3
-&[50 51 49] 231 3
- 采用byte[] 数组修改，然后在变成 string
-[49 50 51 49 50 51]
-[107 107 107 107 107 107]
- 采用byte[] 数组修改，------- string
-采用 + 修改字符串  ------- 
-
-123231 824633827568
-采用 + 修改字符串  ------- end 
-123123231 16 9
-
-
-
-```
+func main() {
+	// pointer()
+	change()
+}
