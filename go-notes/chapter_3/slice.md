@@ -205,3 +205,41 @@ test append --------------
 [1 2 3 4 5 8 10] 7 8
 test append end-------------- 
 ```
+
+一个比较奇怪的东西，为何 `arr2` `cap` 会变成 `8`
+这是因为 内存对齐
+按照前面的计算，`newcap` 应该是`7`
+max(7, 2*3)
+```go
+capmem = roundupsize(uintptr(newcap) * goarch.PtrSize)
+newcap = int(capmem / goarch.PtrSize)
+
+//
+// Returns size of the memory block that mallocgc will allocate if you ask for the size.
+// Returns size of the memory block that mallocgc will allocate if you ask for the size.
+func roundupsize(size uintptr) uintptr {
+if size < _MaxSmallSize {
+	...
+	uintptr(class_to_size[size_to_class8[divRoundUp(size, smallSizeDiv)]])
+}
+_MaxSmallSize   = 32768
+smallSizeDiv    = 8
+smallSizeMax    = 1024
+```
+
+```shell
+size = 7*8 = 56
+divRoundUp(56, 8) = 7,
+size_to_class8[7] = 6
+class_to_size[6] = 64
+newcap = int(capmem / goarch.PtrSize) = 64/8 = 8
+```
+
+当`newcap =6`时
+```shell
+size = 6*8 = 48
+divRoundUp(48, 8) = 6
+size_to_class8[6] = 5
+class_to_size[5] = 48
+newcap = int(capmem / goarch.PtrSize) = 48/8 = 6
+```
