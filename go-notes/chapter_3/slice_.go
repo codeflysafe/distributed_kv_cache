@@ -40,7 +40,8 @@ func main() {
 
 	fmt.Println("test append -------------- ")
 	arr1 := []int{1, 2, 3}
-	arr2 := append(arr1, 4, 5, 6, 7)
+	fmt.Println(arr1, len(arr1), cap(arr1))
+	arr2 := append(arr1, 4, 5, 8, 10)
 	fmt.Println(arr1, len(arr1), cap(arr1))
 	fmt.Println(arr2, len(arr2), cap(arr2))
 	fmt.Println("test append end-------------- ")
