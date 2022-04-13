@@ -2,3 +2,4 @@
 
 - [channel](channel.md)
 - [lock](lock.md)
+- [sync 包](sync.md)
