@@ -87,6 +87,57 @@ buckets 编号就是桶编号，当两个不同的 key 落在同一个桶中，�
 这里参考曹大 github 博客里的一张图，原图是 ascii 图，geek 味十足，可以从参考资料找到曹大的博客，推荐大家去看看。
 ![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412172551.png)
 
+
+### 非并发安全
+```go
+	// flags
+iterator     = 1 // there may be an iterator using buckets
+oldIterator  = 2 // there may be an iterator using oldbuckets
+hashWriting  = 4 // a goroutine is writing to the map
+sameSizeGrow = 8 // the current map growth is to a new map of the same size
+
+if h.flags&hashWriting != 0 {
+	throw("concurrent map read and map write")
+}
+```
+
+如果出现一个goroutine 在修改，而其它在读取的情况，会panic并发错误
+
+### 遍历
+
+```go
+// A hash iteration structure.
+// If you modify hiter, also change cmd/compile/internal/reflectdata/reflect.go
+// and reflect/value.go to match the layout of this structure.
+type hiter struct {
+	key         unsafe.Pointer // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
+	elem        unsafe.Pointer // Must be in second position (see cmd/compile/internal/walk/range.go).
+	t           *maptype
+	h           *hmap
+	buckets     unsafe.Pointer // bucket ptr at hash_iter initialization time
+	bptr        *bmap          // current bucket
+	overflow    *[]*bmap       // keeps overflow buckets of hmap.buckets alive
+	oldoverflow *[]*bmap       // keeps overflow buckets of hmap.oldbuckets alive
+	startBucket uintptr        // bucket iteration started at
+	offset      uint8          // intra-bucket offset to start from during iteration (should be big enough to hold bucketCnt-1)
+	wrapped     bool           // already wrapped around from end of bucket array to beginning
+	B           uint8
+	i           uint8
+	bucket      uintptr
+	checkBucket uintptr
+}
+
+```
+由于遍历的时候，随机从一个bucket上开始，所有每次遍历结果都不相同
+```go
+// decide where to start
+	r := uintptr(fastrand())
+	if h.B > 31-bucketCntBits {
+		r += uintptr(fastrand()) << 31
+	}
+	it.startBucket = r & bucketMask(h.B)
+```
+
 ### 扩容
 1. loadfactor 超过阈值 6.5
 2. too many overflow buckets, overflow buckets 过多 B > 15
