@@ -117,3 +117,59 @@ func TestList_RPeek(t *testing.T) {
 		t.Errorf(" length should is 1")
 	}
 }
+
+func TestList_ListIterator(t *testing.T) {
+	list := NewList()
+	for i := 0; i < 100; i++ {
+		v := fmt.Sprintf("%d", i)
+		list.LPush(Key(v))
+	}
+	it := list.ListIterator(LEFT)
+	for i := 0; i < 100; i++ {
+		fmt.Println(string(it.Next().value))
+	}
+}
+
+func TestList_ListSeek(t *testing.T) {
+	list := NewList()
+	for i := 0; i < 100; i++ {
+		v := fmt.Sprintf("%d", i)
+		list.RPush(Key(v))
+	}
+
+	if list.LLen() != 100 {
+		t.Errorf(" error lens %d", list.LLen())
+	}
+
+	val := list.ListSeek(30)
+	fmt.Println("val is", string(val))
+	if string(val) != "30" {
+		t.Errorf(" error value %s", string(val))
+	}
+
+}
+
+func TestList_ListDelIndex(t *testing.T) {
+	list := NewList()
+	for i := 0; i < 100; i++ {
+		v := fmt.Sprintf("%d", i)
+		list.RPush(Key(v))
+	}
+
+	if list.LLen() != 100 {
+		t.Errorf(" error lens %d", list.LLen())
+	}
+
+	val := list.ListSeek(30)
+	fmt.Println("val is", string(val))
+	if string(val) != "30" {
+		t.Errorf(" error value %s", string(val))
+	}
+
+	list.ListDelIndex(30)
+	val = list.ListSeek(30)
+	fmt.Println("val is", string(val))
+	if string(val) != "31" {
+		t.Errorf(" error value %s", string(val))
+	}
+}

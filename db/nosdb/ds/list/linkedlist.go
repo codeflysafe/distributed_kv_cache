@@ -151,16 +151,28 @@ func (l *List) listIndex(idx int64) *listNode {
 		node = l.tail
 		for idx > 0 && node != nil {
 			node = node.prev
+			idx--
 		}
 	} else {
 		node = l.head
 		for idx > 0 && node != nil {
 			node = node.next
+			idx--
 		}
 	}
 	return node
 }
 
+// 使用 index 访问节点
+func (l *List) ListSeek(idx int64) (value []byte) {
+	node := l.listIndex(idx)
+	if node != nil {
+		value = node.value
+	}
+	return
+}
+
+// 删除固定节点
 func (l *List) listDelNode(node *listNode) {
 	if node.prev != nil {
 		node.prev.next = node.next
@@ -177,7 +189,7 @@ func (l *List) listDelNode(node *listNode) {
 }
 
 // 删除 idx 处的链表节点
-func (l *List) listDelIndex(idx int64) {
+func (l *List) ListDelIndex(idx int64) {
 	node := l.listIndex(idx)
 	if node != nil {
 		l.listDelNode(node)
