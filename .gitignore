@@ -1,3 +1,5 @@
 go
 .vscode
 db/bolt
+db/nosdb/ds/linkedlist/cpu.pprof
+db/nosdb/ds/linkedlist/linkedlist.test

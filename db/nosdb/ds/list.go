@@ -1,5 +1,13 @@
 package ds
 
+type ENCODING uint8
+
+const (
+	LINKED_LIST ENCODING = iota
+	SLICE_LIST
+)
+
+// list 接口
 type List interface {
 	LLen() int
 	LPush(value []byte)
@@ -11,10 +19,4 @@ type List interface {
 	LPeek() (value []byte)
 	RPeek() (value []byte)
 	Empty() bool
-}
-
-// key: value
-// value 是 list
-type DBList struct {
-	KVs map[string]*List
 }
