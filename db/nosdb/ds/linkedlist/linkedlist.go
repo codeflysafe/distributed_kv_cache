@@ -59,7 +59,7 @@ type LinkedList struct {
 }
 
 // 新建一个链表
-func NewSliceList() *LinkedList {
+func NewLinkedList() *LinkedList {
 	return &LinkedList{
 		head:   nil,
 		tail:   nil,
@@ -153,6 +153,9 @@ func (l *LinkedList) listIndex(idx int) *listNode {
 
 // 使用 index 访问节点
 func (l *LinkedList) ListSeek(idx int) (value []byte) {
+	if l.length+idx < 0 || l.length < idx {
+		return
+	}
 	node := l.listIndex(idx)
 	if node != nil {
 		value = node.value

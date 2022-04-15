@@ -12,3 +12,9 @@ type List interface {
 	RPeek() (value []byte)
 	Empty() bool
 }
+
+// key: value
+// value 是 list
+type DBList struct {
+	KVs map[string]*List
+}
