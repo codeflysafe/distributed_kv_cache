@@ -105,6 +105,7 @@ func (sk *SkipList) skListSearch(score float64, member string) *skipListNode {
 
 // 插入 节点
 // see redis-3.0 zslInsert
+// return 插入的节点， 后面共 zset 使用
 func (sk *SkipList) SkListInsert(score float64, member string, value []byte) *skipListNode {
 
 	var x *skipListNode
@@ -191,10 +192,11 @@ func (sk *SkipList) skListDeleteNode(x *skipListNode, update [SKIPLIST_MAXLEVEL]
 		sk.level--
 	}
 	sk.length--
-
 }
 
-func (sk *SkipList) SkListDelete(score float64, member string) {
+// return 1 存在并且已经删除
+// return 0 不存在
+func (sk *SkipList) SkListDelete(score float64, member string) int {
 	var update [SKIPLIST_MAXLEVEL]*skipListNode
 	var x *skipListNode
 	var i int
@@ -215,7 +217,9 @@ func (sk *SkipList) SkListDelete(score float64, member string) {
 		// 删除这一列
 		sk.skListDeleteNode(x, update)
 		x = nil
+		return 1
 	}
+	return 0
 }
 
 // 测试使用

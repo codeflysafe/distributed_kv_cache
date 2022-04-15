@@ -1,4 +1,4 @@
-package list
+package slicelist
 
 import (
 	"fmt"
@@ -11,22 +11,15 @@ func Key(str string) []byte {
 }
 
 func TestList_LPush(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.LPush(Key(val))
 
 	if list.LLen() != 1 {
 		t.Error(" 没有数据，测试失败")
 	}
-	if list.head != list.tail {
-		t.Error(" 头节点失败")
-	}
-	if string(list.head.value) != val {
-		t.Errorf("期待得到 %s, bug get %s", val, string(list.head.value))
-	}
-	fmt.Println(string(list.head.value))
 
-	var lens uint64 = 10000
+	var lens int = 10000
 	for i := 0; i < 10000; i++ {
 		list.LPush(Key(strconv.Itoa(i)))
 	}
@@ -37,10 +30,10 @@ func TestList_LPush(t *testing.T) {
 }
 
 func TestList_LPop(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.LPush(Key(val))
-	vs := list.RPop()
+	vs := list.LPop()
 	fmt.Println(string(vs))
 	if string(vs) != val {
 		t.Errorf(" excepct get %s, bug get %s", val, string(vs))
@@ -51,22 +44,15 @@ func TestList_LPop(t *testing.T) {
 }
 
 func TestList_RPush(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.RPush(Key(val))
 
 	if list.LLen() != 1 {
 		t.Error(" 没有数据，测试失败")
 	}
-	if list.head != list.tail {
-		t.Error(" 头节点失败")
-	}
-	if string(list.head.value) != val {
-		t.Errorf("期待得到 %s, bug get %s", val, string(list.head.value))
-	}
-	fmt.Println(string(list.head.value))
 
-	var lens uint64 = 10000
+	var lens int = 10000
 	for i := 0; i < 10000; i++ {
 		list.RPush(Key(strconv.Itoa(i)))
 	}
@@ -77,7 +63,7 @@ func TestList_RPush(t *testing.T) {
 }
 
 func TestList_RPop(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.RPush(Key(val))
 	vs := list.RPop()
@@ -91,7 +77,7 @@ func TestList_RPop(t *testing.T) {
 }
 
 func TestList_LPeek(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.LPush(Key(val))
 	vs := list.LPeek()
@@ -105,7 +91,7 @@ func TestList_LPeek(t *testing.T) {
 }
 
 func TestList_RPeek(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	val := "123"
 	list.RPush(Key(val))
 	vs := list.RPeek()
@@ -118,20 +104,8 @@ func TestList_RPeek(t *testing.T) {
 	}
 }
 
-func TestList_ListIterator(t *testing.T) {
-	list := NewList()
-	for i := 0; i < 100; i++ {
-		v := fmt.Sprintf("%d", i)
-		list.LPush(Key(v))
-	}
-	it := list.ListIterator(LEFT)
-	for i := 0; i < 100; i++ {
-		fmt.Println(string(it.Next().value))
-	}
-}
-
 func TestList_ListSeek(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	for i := 0; i < 100; i++ {
 		v := fmt.Sprintf("%d", i)
 		list.RPush(Key(v))
@@ -150,7 +124,7 @@ func TestList_ListSeek(t *testing.T) {
 }
 
 func TestList_ListDelIndex(t *testing.T) {
-	list := NewList()
+	list := NewSliceList()
 	for i := 0; i < 100; i++ {
 		v := fmt.Sprintf("%d", i)
 		list.RPush(Key(v))

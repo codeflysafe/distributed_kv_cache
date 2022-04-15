@@ -1,16 +1,4 @@
-package list
-
-import (
-	"errors"
-)
-
-var (
-	// ErrListNotFound return when the list is not found
-	ErrListNotFound = errors.New("not found in this list")
-
-	// ErrIndexOutOfRange return when the index out of range
-	ErrIndexOutOfRange = errors.New("the index out of range")
-)
+package linkedlist
 
 type CMD uint8
 type DIRECTION uint8
@@ -61,18 +49,18 @@ func (it *ListIter) Next() *listNode {
 }
 
 // 双端链表
-type List struct {
+type LinkedList struct {
 	// 头节点
 	head *listNode
 	// 尾节点
 	tail *listNode
 	// 链表的长度
-	length uint64
+	length int
 }
 
 // 新建一个链表
-func NewList() *List {
-	return &List{
+func NewSliceList() *LinkedList {
+	return &LinkedList{
 		head:   nil,
 		tail:   nil,
 		length: 0,
@@ -80,18 +68,18 @@ func NewList() *List {
 }
 
 // 返回链表的长度
-func (l *List) LLen() uint64 {
+func (l *LinkedList) LLen() int {
 	return l.length
 }
 
 // 链表是否为空
-func (l *List) Empty() bool {
+func (l *LinkedList) Empty() bool {
 	return l.length == 0
 }
 
 // 插入到链表头
 // value unsafe.Pointer
-func (l *List) LPush(value []byte) {
+func (l *LinkedList) LPush(value []byte) {
 	node := newListNode(value)
 	// 如果链表为空，
 	if l.length == 0 {
@@ -106,7 +94,7 @@ func (l *List) LPush(value []byte) {
 }
 
 // 从链表left 弹出值
-func (l *List) LPop() (value []byte) {
+func (l *LinkedList) LPop() (value []byte) {
 	if l.head != nil {
 		value = l.head.value
 		l.listDelNode(l.head)
@@ -115,7 +103,7 @@ func (l *List) LPop() (value []byte) {
 }
 
 // 插入到链表尾
-func (l *List) RPush(value []byte) {
+func (l *LinkedList) RPush(value []byte) {
 	node := newListNode(value)
 	// 如果链表为空，
 	if l.length == 0 {
@@ -130,7 +118,7 @@ func (l *List) RPush(value []byte) {
 }
 
 // 从链表 right 弹出值
-func (l *List) RPop() (value []byte) {
+func (l *LinkedList) RPop() (value []byte) {
 	if l.tail != nil {
 		value = l.tail.value
 		l.listDelNode(l.tail)
@@ -144,7 +132,7 @@ func (l *List) RPop() (value []byte) {
  * from the tail, -1 is the last element, -2 the penultimate
  * and so on. If the index is out of range NULL is returned. */
 // from redis-3.0
-func (l *List) listIndex(idx int64) *listNode {
+func (l *LinkedList) listIndex(idx int) *listNode {
 	var node *listNode
 	if idx < 0 {
 		idx = (-idx) - 1
@@ -164,7 +152,7 @@ func (l *List) listIndex(idx int64) *listNode {
 }
 
 // 使用 index 访问节点
-func (l *List) ListSeek(idx int64) (value []byte) {
+func (l *LinkedList) ListSeek(idx int) (value []byte) {
 	node := l.listIndex(idx)
 	if node != nil {
 		value = node.value
@@ -173,7 +161,7 @@ func (l *List) ListSeek(idx int64) (value []byte) {
 }
 
 // 删除固定节点
-func (l *List) listDelNode(node *listNode) {
+func (l *LinkedList) listDelNode(node *listNode) {
 	if node.prev != nil {
 		node.prev.next = node.next
 	} else {
@@ -189,7 +177,7 @@ func (l *List) listDelNode(node *listNode) {
 }
 
 // 删除 idx 处的链表节点
-func (l *List) ListDelIndex(idx int64) {
+func (l *LinkedList) ListDelIndex(idx int) {
 	node := l.listIndex(idx)
 	if node != nil {
 		l.listDelNode(node)
@@ -197,7 +185,7 @@ func (l *List) ListDelIndex(idx int64) {
 }
 
 // return the Iterator
-func (l *List) ListIterator(direction DIRECTION) *ListIter {
+func (l *LinkedList) ListIterator(direction DIRECTION) *ListIter {
 	if direction == LEFT {
 		return &ListIter{
 			next:      l.head,
@@ -212,7 +200,7 @@ func (l *List) ListIterator(direction DIRECTION) *ListIter {
 }
 
 // 返回头节点，但是不删除
-func (l *List) LPeek() (value []byte) {
+func (l *LinkedList) LPeek() (value []byte) {
 	if l.head != nil {
 		value = l.head.value
 	}
@@ -220,7 +208,7 @@ func (l *List) LPeek() (value []byte) {
 }
 
 // 返回尾节点, 但是不删除
-func (l *List) RPeek() (value []byte) {
+func (l *LinkedList) RPeek() (value []byte) {
 	if l.tail != nil {
 		value = l.tail.value
 	}
