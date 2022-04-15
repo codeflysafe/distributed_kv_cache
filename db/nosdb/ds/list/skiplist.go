@@ -1,6 +1,7 @@
 package list
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -83,13 +84,28 @@ func randomLevel() int {
 	return level
 }
 
-func (sk *SkipList) SearchNode(score float64, member string) *skipListNode {
+// 根据 score 和 member 查找对应的 skipListNode
+func (sk *SkipList) skListSearch(score float64, member string) *skipListNode {
+	var i int
+	var x *skipListNode
+	x = sk.head
+	for i = sk.level - 1; i >= 0; i-- {
+		for x.level[i].forward != nil && (x.level[i].forward.score < score || (x.level[i].forward.score == score && x.level[i].forward.member < member)) {
+			x = x.level[i].forward
+		}
+	}
+	/* We may have multiple elements with the same score, what we need
+	 * is to find the element with both the right score and member. */
+	x = x.level[0].forward
+	if x != nil && score == x.score && x.member == member {
+		return x
+	}
 	return nil
 }
 
 // 插入 节点
 // see redis-3.0 zslInsert
-func (sk *SkipList) InsertNode(score float64, member string, value []byte) *skipListNode {
+func (sk *SkipList) SkListInsert(score float64, member string, value []byte) *skipListNode {
 
 	var x *skipListNode
 	var update [SKIPLIST_MAXLEVEL]*skipListNode
@@ -150,4 +166,69 @@ func (sk *SkipList) InsertNode(score float64, member string, value []byte) *skip
 
 	sk.length++
 	return x
+}
+
+// 删除节点
+func (sk *SkipList) skListDeleteNode(x *skipListNode, update [SKIPLIST_MAXLEVEL]*skipListNode) {
+	var i int
+	// 删掉 x
+	for i = 0; i < sk.level; i++ {
+		if update[i].level[i].forward == x {
+			update[i].level[i].span = x.level[i].span - 1
+			update[i].level[i].forward = x.level[i].forward
+		} else {
+			update[i].level[i].span -= 1
+		}
+	}
+	// 更新 tail 节点 和 backward
+	if x.level[0].forward != nil {
+		x.level[0].forward.backward = x.backward
+	} else {
+		sk.tail = x.backward
+	}
+
+	for sk.level > 1 && sk.head.level[sk.level-1].forward == nil {
+		sk.level--
+	}
+	sk.length--
+
+}
+
+func (sk *SkipList) SkListDelete(score float64, member string) {
+	var update [SKIPLIST_MAXLEVEL]*skipListNode
+	var x *skipListNode
+	var i int
+
+	x = sk.head
+
+	// 找到对应的 节点
+	for i = sk.level - 1; i >= 0; i-- {
+		for x.level[i].forward != nil && (x.level[i].forward.score < score || (x.level[i].forward.score == score && x.level[i].forward.member < member)) {
+			x = x.level[i].forward
+		}
+		update[i] = x
+	}
+	/* We may have multiple elements with the same score, what we need
+	 * is to find the element with both the right score and member. */
+	x = x.level[0].forward
+	if x != nil && score == x.score && x.member == member {
+		// 删除这一列
+		sk.skListDeleteNode(x, update)
+		x = nil
+	}
+}
+
+// 测试使用
+func (sk *SkipList) skListPrintByLevel() {
+	var x *skipListNode
+	var i int
+	// 每层遍历
+	for i = sk.level - 1; i >= 0; i-- {
+		x = sk.head
+		fmt.Println(" level ", i)
+		for x != nil {
+			fmt.Println(string(x.value))
+			x = x.level[i].forward
+		}
+	}
 }
