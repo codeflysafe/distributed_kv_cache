@@ -1,4 +1,4 @@
-package skiplist
+package zskset
 
 import "testing"
 

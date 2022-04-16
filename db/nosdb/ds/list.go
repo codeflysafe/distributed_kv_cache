@@ -1,12 +1,5 @@
 package ds
 
-type ENCODING uint8
-
-const (
-	LINKED_LIST ENCODING = iota
-	SLICE_LIST
-)
-
 // list 接口
 type List interface {
 	LLen() int

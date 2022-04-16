@@ -1,8 +1,9 @@
-package skiplist
+package zskset
 
 import (
 	"fmt"
 	"math/rand"
+	"nosdb/ds"
 )
 
 const (
@@ -196,7 +197,7 @@ func (sk *SkipList) skListDeleteNode(x *skipListNode, update [SKIPLIST_MAXLEVEL]
 
 // return 1 存在并且已经删除
 // return 0 不存在
-func (sk *SkipList) SkListDelete(score float64, member string) int {
+func (sk *SkipList) SkListDelete(score float64, member string) *skipListNode {
 	var update [SKIPLIST_MAXLEVEL]*skipListNode
 	var x *skipListNode
 	var i int
@@ -216,10 +217,8 @@ func (sk *SkipList) SkListDelete(score float64, member string) int {
 	if x != nil && score == x.score && x.member == member {
 		// 删除这一列
 		sk.skListDeleteNode(x, update)
-		x = nil
-		return 1
 	}
-	return 0
+	return x
 }
 
 // 测试使用
@@ -235,4 +234,36 @@ func (sk *SkipList) skListPrintByLevel() {
 			x = x.level[i].forward
 		}
 	}
+}
+
+func skListValueGetMin(score float64, rangeSpec *ds.ZRangeSpec) bool {
+	if rangeSpec.Minex {
+		return score > rangeSpec.MinScore
+	} else {
+		return score >= rangeSpec.MinScore
+	}
+}
+
+func skListValueGetMax(score float64, rangeSpec *ds.ZRangeSpec) bool {
+	if rangeSpec.Maxex {
+		return score < rangeSpec.MaxScore
+	} else {
+		return score <= rangeSpec.MaxScore
+	}
+}
+
+func (sk *SkipList) skListIsInRange(rangeSpec *ds.ZRangeSpec) bool {
+	var x *skipListNode
+	if (rangeSpec.MinScore > rangeSpec.MaxScore) || (rangeSpec.MinScore == rangeSpec.MaxScore && (rangeSpec.Minex || rangeSpec.Maxex)) {
+		return false
+	}
+	x = sk.tail
+	if x == nil || !skListValueGetMin(x.score, rangeSpec) {
+		return false
+	}
+	x = sk.head.level[0].forward
+	if x == nil || !skListValueGetMax(x.score, rangeSpec) {
+		return false
+	}
+	return true
 }

@@ -1,11 +1,14 @@
 package ds
 
-import "nosdb/ds/skiplist"
+/* Struct to hold a inclusive/exclusive range spec by score comparison. */
+type ZRangeSpec struct {
+	MinScore, MaxScore float64 // min Score -> maxScore
+	Minex, Maxex       bool    /* are min or max exclusive? */
+	Limit              int     // limit nums
+}
 
-// 有序集合数据结构
-type ZSet struct {
-	// key value
-	Items map[string][]byte
-	// 跳表实现的有序集合
-	list *skiplist.SkipList
+type ZSet interface {
+	ZAdd(score float64, member string, value []byte)
+	ZDel(score float64, member string)
+	ZRange(rangspec ZRangeSpec)
 }
