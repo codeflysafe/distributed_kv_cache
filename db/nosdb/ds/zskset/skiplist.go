@@ -236,7 +236,7 @@ func (sk *SkipList) skListPrintByLevel() {
 	}
 }
 
-func skListValueGetMin(score float64, rangeSpec *ds.ZRangeSpec) bool {
+func skListValueGetMin(score float64, rangeSpec ds.ZRangeSpec) bool {
 	if rangeSpec.Minex {
 		return score > rangeSpec.MinScore
 	} else {
@@ -244,7 +244,7 @@ func skListValueGetMin(score float64, rangeSpec *ds.ZRangeSpec) bool {
 	}
 }
 
-func skListValueGetMax(score float64, rangeSpec *ds.ZRangeSpec) bool {
+func skListValueGetMax(score float64, rangeSpec ds.ZRangeSpec) bool {
 	if rangeSpec.Maxex {
 		return score < rangeSpec.MaxScore
 	} else {
@@ -252,7 +252,7 @@ func skListValueGetMax(score float64, rangeSpec *ds.ZRangeSpec) bool {
 	}
 }
 
-func (sk *SkipList) skListIsInRange(rangeSpec *ds.ZRangeSpec) bool {
+func (sk *SkipList) skListIsInRange(rangeSpec ds.ZRangeSpec) bool {
 	var x *skipListNode
 	if (rangeSpec.MinScore > rangeSpec.MaxScore) || (rangeSpec.MinScore == rangeSpec.MaxScore && (rangeSpec.Minex || rangeSpec.Maxex)) {
 		return false
@@ -266,4 +266,8 @@ func (sk *SkipList) skListIsInRange(rangeSpec *ds.ZRangeSpec) bool {
 		return false
 	}
 	return true
+}
+
+func (sk *SkipList) skListRange(rangSpec ds.ZRangeSpec) {
+	//sk.skListSearch()
 }
