@@ -36,7 +36,7 @@ func (e *Entry) GetSize() int64 {
 	return (int64)(entryHeaderSize + e.KeySize + e.ValueSize)
 }
 
-// encode 编码，返回字节数组
+// `encode` 编码，返回字节数组
 func (e *Entry) Encode() ([]byte, error) {
 	buf := make([]byte, e.GetSize())
 	binary.BigEndian.PutUint32(buf[0:4], e.KeySize)
@@ -47,7 +47,7 @@ func (e *Entry) Encode() ([]byte, error) {
 	return buf, nil
 }
 
-// 将字节流解码为 entry 实体
+// 将字节流解码为 `entry` 实体
 func Decode(buf []byte) (entry *Entry, err error) {
 	if len(buf) != entryHeaderSize {
 		err = fmt.Errorf(" len is not match ")
