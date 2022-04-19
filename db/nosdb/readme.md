@@ -6,4 +6,4 @@
 
 ## Plan
 - [ ] bitcask\ B+Tree\ LSM_Tree 了解和学习
-- [ ] 参考 redis 实现基本数据结构 ziplist\skiplist\linkedlist\string
+- [x] 参考 redis 实现基本数据结构 ziplist\skiplist\linkedlist\string
