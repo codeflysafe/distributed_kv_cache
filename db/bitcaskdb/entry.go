@@ -14,7 +14,6 @@ const (
 )
 
 // 一个存储条目
-//
 type Entry struct {
 	Key       []byte
 	KeySize   uint32 // key 的长度

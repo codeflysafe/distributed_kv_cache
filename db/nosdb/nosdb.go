@@ -2,9 +2,9 @@ package nosdb
 
 import "unsafe"
 
-type ENCODING uint8
+type ENCODING uint16
 
-type TYPE uint8
+type TYPE uint16
 
 const (
 	// list
@@ -12,8 +12,8 @@ const (
 	SLICE_LIST
 	// zset
 	SKIPLIST
-	// map
-	MAP
+	// hash
+	MHASH
 )
 const (
 	//===========  type =========

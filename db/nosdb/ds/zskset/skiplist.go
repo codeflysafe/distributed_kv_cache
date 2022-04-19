@@ -268,6 +268,74 @@ func (sk *SkipList) skListIsInRange(rangeSpec ds.ZRangeSpec) bool {
 	return true
 }
 
-func (sk *SkipList) skListRange(rangSpec ds.ZRangeSpec) {
-	//sk.skListSearch()
+/* Find the first node that is contained in the specified range.
+ * Returns NULL when no element is contained in the rangSpec. */
+func (sk *SkipList) skListFirstInRange(rangSpec ds.ZRangeSpec) *skipListNode {
+	var x *skipListNode
+	var i int
+
+	if !sk.skListIsInRange(rangSpec) {
+		return nil
+	}
+
+	x = sk.head
+	for i = sk.level - 1; i >= 0; i-- {
+		for x.level[i].forward != nil && !skListValueGetMin(x.level[i].forward.score, rangSpec) {
+			x = x.level[i].forward
+		}
+	}
+	//
+	x = x.level[0].forward
+	if x == nil {
+		return nil
+	}
+	if !skListValueGetMax(x.score, rangSpec) {
+		return nil
+	}
+	return x
+}
+
+/* Find the last node that is contained in the specified range.
+ * Returns NULL when no element is contained in the ZRangeSpec. */
+func (sk *SkipList) skListLastInRange(rangSpec ds.ZRangeSpec) *skipListNode {
+	var x *skipListNode
+	var i int
+
+	if !sk.skListIsInRange(rangSpec) {
+		return nil
+	}
+
+	x = sk.head
+	for i = sk.level - 1; i >= 0; i-- {
+		for x.level[i].forward != nil && skListValueGetMax(x.level[i].forward.score, rangSpec) {
+			x = x.level[i].forward
+		}
+	}
+	//
+	if x == nil {
+		return nil
+	}
+	if !skListValueGetMin(x.score, rangSpec) {
+		return nil
+	}
+	return x
+}
+
+// GetByScoreRange returns the nodes whose score within the specific range.
+// If options is nil, it searches in interval [start, end] without any limit by default.
+//
+// Time complexity of this method is : O(log(N) + O(xxx)).
+func (sk *SkipList) skListRange(rangSpec ds.ZRangeSpec) []*skipListNode {
+	// 默认容量为一半，防止扩容过多
+	nodes := make([]*skipListNode, 0, sk.length/2+1)
+	first, last := sk.skListFirstInRange(rangSpec), sk.skListLastInRange(rangSpec)
+	if first == nil || last == nil {
+		return nodes
+	}
+	for first != nil && first != last {
+		nodes = append(nodes, first)
+		first = first.level[0].forward
+	}
+	nodes = append(nodes, last)
+	return nodes
 }

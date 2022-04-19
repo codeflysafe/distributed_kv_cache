@@ -1,7 +1,7 @@
 package slicelist
 
 const (
-	SLICE_LEN = 10
+	SLICE_LEN = 8
 )
 
 // 采用 slice 包装的 list
