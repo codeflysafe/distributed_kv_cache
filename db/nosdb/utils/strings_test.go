@@ -46,13 +46,14 @@ func TestStrIncrBy(t *testing.T) {
 }
 
 func TestBytesIncrBy(t *testing.T) {
-	val := "1"
+	val := "0"
 	offset := 12
-	newV, err := StrIncrBy(val, offset)
+	newV, err := BytesIncrBy([]byte(val), offset)
 	if err != nil {
 		t.Error(err)
 	}
-	if newV != "13" {
+	fmt.Println(string(newV))
+	if string(newV) != "12" {
 		t.Errorf(" res is err, get %s", newV)
 	}
 }

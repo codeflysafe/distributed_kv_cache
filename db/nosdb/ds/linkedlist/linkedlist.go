@@ -1,5 +1,7 @@
 package linkedlist
 
+import "fmt"
+
 type CMD uint8
 type DIRECTION uint8
 
@@ -152,8 +154,9 @@ func (l *LinkedList) listIndex(idx int) *listNode {
 }
 
 // 使用 index 访问节点
-func (l *LinkedList) ListSeek(idx int) (value []byte) {
-	if l.length+idx < 0 || l.length < idx {
+func (l *LinkedList) ListSeek(idx int) (value []byte, err error) {
+	if (idx < 0 && l.length+idx < 0) || l.length < idx {
+		err = fmt.Errorf("index %d out of range", idx)
 		return
 	}
 	node := l.listIndex(idx)
@@ -161,6 +164,20 @@ func (l *LinkedList) ListSeek(idx int) (value []byte) {
 		value = node.value
 	}
 	return
+}
+
+// 更新 index 下的值
+func (l *LinkedList) ListSet(idx int, newVal []byte) (err error) {
+	if (idx < 0 && l.length+idx < 0) || l.length < idx {
+		err = fmt.Errorf("index %d out of range", idx)
+		return
+	}
+	node := l.listIndex(idx)
+	if node != nil {
+		node.value = newVal
+	}
+	return
+
 }
 
 // 删除固定节点

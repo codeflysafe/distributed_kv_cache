@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"hash/crc32"
-	"nosdb"
 	"time"
 )
 
@@ -22,14 +21,14 @@ const (
 
 // entry 的一些`meta`信息
 type Meta struct {
-	CRC       uint32         // crc 校验信息
-	Timestamp uint64         // 时间戳
-	TTL       uint32         // 定时时间, 0 代表用不过期
-	KeySize   uint32         // key 的长度
-	ValueSize uint32         // value 长度
-	Mark      MARK           // 标记，PUT or DEL
-	Encoding  nosdb.ENCODING // 底层数据结构，编码类型
-	Ty        nosdb.TYPE     // 存储类型， list, set, zset
+	CRC       uint32      // crc 校验信息
+	Timestamp uint64      // 时间戳
+	TTL       uint32      // 定时时间, 0 代表用不过期
+	KeySize   uint32      // key 的长度
+	ValueSize uint32      // value 长度
+	Mark      MARK        // 标记，PUT or DEL
+	Encoding  db.ENCODING // 底层数据结构，编码类型
+	Ty        db.TYPE     // 存储类型， list, set, zset
 }
 
 // 一个存储条目
@@ -47,7 +46,7 @@ type Entry struct {
 }
 
 // 新建一条记录
-func NewEntry(key, value []byte, mark MARK, TTL uint32, encoding nosdb.ENCODING, ty nosdb.TYPE) *Entry {
+func NewEntry(key, value []byte, mark MARK, TTL uint32, encoding db.ENCODING, ty db.TYPE) *Entry {
 	return &Entry{
 		Key:   key,
 		Value: value,
@@ -103,8 +102,8 @@ func DecodeMeta(buf []byte) (entry *Entry, err error) {
 	entry.KeySize = binary.BigEndian.Uint32(buf[16:20])
 	entry.ValueSize = binary.BigEndian.Uint32(buf[20:24])
 	entry.Mark = (MARK)(binary.BigEndian.Uint32(buf[24:26]))
-	entry.Ty = (nosdb.TYPE)(binary.BigEndian.Uint32(buf[26:28]))
-	entry.Encoding = (nosdb.ENCODING)(binary.BigEndian.Uint32(buf[28:30]))
+	entry.Ty = (db.TYPE)(binary.BigEndian.Uint32(buf[26:28]))
+	entry.Encoding = (db.ENCODING)(binary.BigEndian.Uint32(buf[28:30]))
 	return
 }
 

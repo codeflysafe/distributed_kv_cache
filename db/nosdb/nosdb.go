@@ -2,7 +2,6 @@ package nosdb
 
 import (
 	"sync"
-	"unsafe"
 )
 
 type ENCODING uint16
@@ -27,20 +26,17 @@ const (
 	STRING
 )
 
-// NosObj 用来存储 value
-type NosObj struct {
-	// 底层数据结构
-	encoding ENCODING
-	// 存储类型
-	ty TYPE
-	// 指向底层数据结构的指针
-	ptr unsafe.Pointer
-}
-
-// k/v 存储结构
+// kv 存储结构
 type NosDB struct {
+	// 全局的锁
 	sync.RWMutex
-	kv map[string]NosObj
+
+	// 5 种索引， 每个索引有一个读写锁
+	listIdx *ListIndex
+	hashIdx *HashIndex
+	setIdx  *SetIndex
+	zSetIdx *ZSetIndex
+	strIdx  *StringIndex
 
 	// todo 缓存淘汰策略
 	// lru 策略

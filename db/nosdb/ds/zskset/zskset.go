@@ -50,10 +50,11 @@ func (zs *ZSkSet) ZDel(score float64, member string) {
 }
 
 // 查询
+// todo
 func (zs *ZSkSet) ZRange(rangspec ds.ZRangeSpec) {
-
+	zs.list.skListRange(rangspec)
 }
 
-func (zs *ZSkSet) Zcount(rangspec ds.ZRangeSpec) int {
+func (zs *ZSkSet) ZCount(rangspec ds.ZRangeSpec) int {
 	return len(zs.list.skListRange(rangspec))
 }

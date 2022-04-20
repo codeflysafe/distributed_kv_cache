@@ -1,0 +1,2 @@
+# Go: struct to []byte
+

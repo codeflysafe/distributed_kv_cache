@@ -14,7 +14,7 @@ const (
 // 范围一个 修改后的 string， 或者一个错误 if error !=nil
 //本操作的值限制在 64 位(bit)有符号数字表示之内。
 func BytesIncrBy(val []byte, offset int) (newVal []byte, err error) {
-	if val == nil || len(val) == 0 {
+	if val == nil {
 		err = fmt.Errorf(" val is blank  %v", val)
 		return
 	}
