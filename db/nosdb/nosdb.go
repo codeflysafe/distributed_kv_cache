@@ -1,6 +1,9 @@
 package nosdb
 
-import "unsafe"
+import (
+	"sync"
+	"unsafe"
+)
 
 type ENCODING uint16
 
@@ -32,8 +35,13 @@ type NosObj struct {
 	ty TYPE
 	// 指向底层数据结构的指针
 	ptr unsafe.Pointer
+}
+
+// k/v 存储结构
+type NosDB struct {
+	sync.RWMutex
+	kv map[string]NosObj
 
 	// todo 缓存淘汰策略
 	// lru 策略
-
 }

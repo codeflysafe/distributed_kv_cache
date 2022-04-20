@@ -1,8 +1,7 @@
 package hash
 
 import (
-	"fmt"
-	"strconv"
+	"nosdb/utils"
 )
 
 // 采用 map 作为hash table
@@ -69,31 +68,24 @@ func (mh *MHash) HSetNx(key string, value []byte) {
 func (mh *MHash) HIncrBy(key string, offset int) error {
 	mh.HSetNx(key, []byte("0"))
 	v := mh.Items[key]
-	vs, err := strconv.Atoi(string(v))
+	vs, err := utils.BytesIncrBy(v, offset)
 	if err != nil {
 		return err
 	}
-	minV, maxV := 0xFFFFFFFF, 0x7FFFFFFF
-	if offset < 0 && minV-offset > vs {
-		return fmt.Errorf(" value overflow minv %d, %d", vs, offset)
-	} else if offset >= 0 && maxV-offset < vs {
-		return fmt.Errorf(" value overflow maxv %d, %d", vs, offset)
-	}
-	vs += offset
-	mh.HSet(key, []byte(strconv.Itoa(vs)))
+	mh.HSet(key, vs)
 	return nil
 }
 
 //Redis Hincrbyfloat 命令用于为哈希表中的字段值加上指定浮点数增量值。
 //如果指定的字段不存在，那么在执行命令前，字段的值被初始化为 0 。
-func (mh *MHash) HIncrByFloat(key string, offset float64) error {
+func (mh *MHash) HIncrByFloat(key string, offset float64) (err error) {
 	mh.HSetNx(key, []byte("0"))
 	v := mh.Items[key]
-	vs, err := strconv.ParseFloat(string(v), 64)
+	var newV []byte
+	newV, err = utils.ByteIncrByFloat(v, offset)
 	if err != nil {
-		return err
+		return
 	}
-	vs += offset
-	mh.HSet(key, []byte(strconv.FormatFloat(vs, 'g', -1, 64)))
-	return nil
+	mh.HSet(key, newV)
+	return
 }
