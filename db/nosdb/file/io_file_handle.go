@@ -9,6 +9,7 @@ import (
 type IOFileHandle struct {
 	file      *os.File
 	maxLength int
+	close     bool // 文件是否已经关闭
 }
 
 func newIOFileHandle(file *os.File, maxLength int) (FileHandle, error) {
@@ -67,10 +68,25 @@ func (h *IOFileHandle) Sync() error {
 }
 
 func (h *IOFileHandle) Close() error {
-	return h.file.Close()
+	err := h.file.Close()
+	if err != nil {
+		return err
+	}
+	h.close = true
+	return nil
 }
 
 func (h *IOFileHandle) Delete() error {
-	_ = h.Close()
+	if !h.close {
+		err := h.Close()
+		if err != nil {
+			return err
+		}
+		h.close = true
+	}
 	return os.Remove(h.file.Name())
+}
+
+func (h *IOFileHandle) IsClose() bool {
+	return h.close
 }

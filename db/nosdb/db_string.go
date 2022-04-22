@@ -53,18 +53,25 @@ func (db *NosDB) GetRange(key string, start, end int) []byte {
 	return nil
 }
 
-// Getset 命令用于设置指定 key 的值，并返回 key 的旧值。
+// GetSet 命令用于设置指定 key 的值，并返回 key 的旧值。
+// 如果不存在，则 set 后返回 nil
 func (db *NosDB) GetSet(key string, newVal []byte) []byte {
 	db.lazyStr()
 	db.strIdx.Lock()
 	defer db.strIdx.Unlock()
 	if obj, ok := db.strIdx.kv[key]; ok {
 		return obj.GetSet(newVal)
+	} else {
+		//
+		str := ds.NewString()
+		str.Set(newVal)
+		db.strIdx.kv[key] = str
 	}
 	return nil
 }
 
 // （SET if Not eXists） 命令在指定的 key 不存在时，为 key 设置指定的值。
+// 若存在， 则不处理
 func (db *NosDB) SetNx(key string, value []byte) {
 	db.lazyStr()
 	db.strIdx.Lock()

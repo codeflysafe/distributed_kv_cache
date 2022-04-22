@@ -10,6 +10,7 @@ type MMapFileHandle struct {
 	mm        *mmap.MMap
 	file      *os.File
 	maxLength int
+	close     bool // 文件是否已经关闭
 }
 
 func newMMapFileHandle(file *os.File, maxLength int) (FileHandle, error) {
@@ -62,6 +63,7 @@ func (h *MMapFileHandle) Close() (err error) {
 	if err != nil {
 		return
 	}
+	h.close = true
 	err = h.mm.MunMap()
 	return
 }
@@ -70,6 +72,15 @@ func (h *MMapFileHandle) Delete() (err error) {
 	if err = h.checkFile(); err != nil {
 		return
 	}
-	_ = h.Close()
+	if !h.close {
+		err = h.Close()
+		if err != nil {
+			return
+		}
+		h.close = true
+	}
 	return os.Remove(h.file.Name())
+}
+func (h *MMapFileHandle) IsClose() bool {
+	return h.close
 }
