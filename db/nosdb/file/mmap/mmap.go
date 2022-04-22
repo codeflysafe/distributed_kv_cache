@@ -2,6 +2,7 @@ package mmap
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"unsafe"
@@ -26,6 +27,14 @@ type MMap struct {
 func NewMMap(file *os.File, inProt int, length int) (*MMap, error) {
 	if file == nil {
 		err := errors.New(" file is nil ")
+		return nil, err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if info.Size() < int64(length) {
+		err = fmt.Errorf(" file size %d less length %d, please check it ", info.Size(), length)
 		return nil, err
 	}
 	data, err := mmap(length, inProt, int(file.Fd()), 0)

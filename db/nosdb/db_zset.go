@@ -43,7 +43,7 @@ func (db *NosDB) ZCount(key string, minScore, maxSCore float64) int {
 	db.zSetIdx.RLock()
 	defer db.zSetIdx.RUnlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
-		return obj.ZCount(ds.ZRangeSpec{minScore, maxSCore, false, false})
+		return obj.ZCount(minScore, maxSCore, false, false)
 	}
 	return 0
 }

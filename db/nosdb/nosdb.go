@@ -5,7 +5,6 @@ import (
 )
 
 type ENCODING uint16
-
 type TYPE uint16
 
 const (
@@ -45,4 +44,8 @@ type NosDB struct {
 
 	// todo 缓存淘汰策略
 	// lru 策略
+}
+
+func NewNosDB() *NosDB {
+	return new(NosDB)
 }

@@ -1,6 +1,10 @@
 package zskset
 
-import "nosdb/ds"
+/* Struct to hold a inclusive/exclusive range spec by score comparison. */
+type ZRangeSpec struct {
+	MinScore, MaxScore float64 // min Score -> maxScore
+	MinEx, MaxEx       bool    /* are min or max exclusive? */
+}
 
 // 有序集合数据结构
 type ZSkSet struct {
@@ -51,12 +55,12 @@ func (zs *ZSkSet) ZDel(score float64, member string) {
 
 // 查询
 // Todo
-func (zs *ZSkSet) ZRange(rangSpec ds.ZRangeSpec) {
-	zs.list.skListRange(rangSpec)
+func (zs *ZSkSet) ZRange(minScore, maxScore float64, minEx, maxEx bool) {
+	zs.list.skListRange(ZRangeSpec{minScore, maxScore, minEx, maxEx})
 }
 
-func (zs *ZSkSet) ZCount(rangSpec ds.ZRangeSpec) int {
-	return len(zs.list.skListRange(rangSpec))
+func (zs *ZSkSet) ZCount(minScore, maxScore float64, minEx, maxEx bool) int {
+	return len(zs.list.skListRange(ZRangeSpec{minScore, maxScore, minEx, maxEx}))
 }
 
 func (zs *ZSkSet) ZIncrScore(member string, value []byte, offset float64) {

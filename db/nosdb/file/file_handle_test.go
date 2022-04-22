@@ -18,7 +18,7 @@ func TestIOFileHandle_WriteAt(t *testing.T) {
 	}
 	defer handle.Close()
 	value := []byte("hsj is a bed man. and more time 杀人诛心!")
-	offset, err := handle.WriteAt(1024, value)
+	offset, err := handle.WriteAt(1<<20-45, value)
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +36,7 @@ func TestIOFileHandle_ReadAt(t *testing.T) {
 		t.Error(err)
 	}
 	defer handle.Close()
-	b, err := handle.ReadAt(1024, 45)
+	b, err := handle.ReadAt(1<<20-45, 45)
 	if err != nil {
 		t.Error(err)
 	}

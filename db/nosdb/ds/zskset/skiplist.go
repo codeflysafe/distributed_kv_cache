@@ -3,7 +3,6 @@ package zskset
 import (
 	"fmt"
 	"math/rand"
-	"nosdb/ds"
 )
 
 const (
@@ -236,7 +235,7 @@ func (sk *SkipList) skListPrintByLevel() {
 	}
 }
 
-func skListValueGetMin(score float64, rangeSpec ds.ZRangeSpec) bool {
+func skListValueGetMin(score float64, rangeSpec ZRangeSpec) bool {
 	if rangeSpec.MinEx {
 		return score > rangeSpec.MinScore
 	} else {
@@ -244,7 +243,7 @@ func skListValueGetMin(score float64, rangeSpec ds.ZRangeSpec) bool {
 	}
 }
 
-func skListValueGetMax(score float64, rangeSpec ds.ZRangeSpec) bool {
+func skListValueGetMax(score float64, rangeSpec ZRangeSpec) bool {
 	if rangeSpec.MaxEx {
 		return score < rangeSpec.MaxScore
 	} else {
@@ -252,7 +251,7 @@ func skListValueGetMax(score float64, rangeSpec ds.ZRangeSpec) bool {
 	}
 }
 
-func (sk *SkipList) skListIsInRange(rangeSpec ds.ZRangeSpec) bool {
+func (sk *SkipList) skListIsInRange(rangeSpec ZRangeSpec) bool {
 	var x *skipListNode
 	if (rangeSpec.MinScore > rangeSpec.MaxScore) || (rangeSpec.MinScore == rangeSpec.MaxScore && (rangeSpec.MinEx || rangeSpec.MaxEx)) {
 		return false
@@ -270,7 +269,7 @@ func (sk *SkipList) skListIsInRange(rangeSpec ds.ZRangeSpec) bool {
 
 /* Find the first node that is contained in the specified range.
  * Returns NULL when no element is contained in the rangSpec. */
-func (sk *SkipList) skListFirstInRange(rangSpec ds.ZRangeSpec) *skipListNode {
+func (sk *SkipList) skListFirstInRange(rangSpec ZRangeSpec) *skipListNode {
 	var x *skipListNode
 	var i int
 
@@ -297,7 +296,7 @@ func (sk *SkipList) skListFirstInRange(rangSpec ds.ZRangeSpec) *skipListNode {
 
 /* Find the last node that is contained in the specified range.
  * Returns NULL when no element is contained in the ZRangeSpec. */
-func (sk *SkipList) skListLastInRange(rangSpec ds.ZRangeSpec) *skipListNode {
+func (sk *SkipList) skListLastInRange(rangSpec ZRangeSpec) *skipListNode {
 	var x *skipListNode
 	var i int
 
@@ -325,7 +324,7 @@ func (sk *SkipList) skListLastInRange(rangSpec ds.ZRangeSpec) *skipListNode {
 // If options is nil, it searches in interval [start, end] without any limit by default.
 //
 // Time complexity of this method is : O(log(N) + O(xxx)).
-func (sk *SkipList) skListRange(rangSpec ds.ZRangeSpec) []*skipListNode {
+func (sk *SkipList) skListRange(rangSpec ZRangeSpec) []*skipListNode {
 	// 默认容量为一半，防止扩容过多
 	nodes := make([]*skipListNode, 0, sk.length/2+1)
 	first, last := sk.skListFirstInRange(rangSpec), sk.skListLastInRange(rangSpec)
