@@ -3,6 +3,15 @@ package nosdb
 import "nosdb/ds"
 
 // ======================= string ====================
+
+func (db *NosDB) lazyStr() {
+	db.strOnce.Do(func() {
+		if db.strIdx == nil {
+			db.strIdx = NewStringIndex()
+		}
+	})
+}
+
 // 设置指定 key 的值。
 // SET 命令用于设置给定 key 的值。
 // 如果 key 已经存储其他值， SET 就覆写旧值，且无视类型。

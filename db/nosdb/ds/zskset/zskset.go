@@ -50,11 +50,31 @@ func (zs *ZSkSet) ZDel(score float64, member string) {
 }
 
 // 查询
-// todo
-func (zs *ZSkSet) ZRange(rangspec ds.ZRangeSpec) {
-	zs.list.skListRange(rangspec)
+// Todo
+func (zs *ZSkSet) ZRange(rangSpec ds.ZRangeSpec) {
+	zs.list.skListRange(rangSpec)
 }
 
-func (zs *ZSkSet) ZCount(rangspec ds.ZRangeSpec) int {
-	return len(zs.list.skListRange(rangspec))
+func (zs *ZSkSet) ZCount(rangSpec ds.ZRangeSpec) int {
+	return len(zs.list.skListRange(rangSpec))
+}
+
+func (zs *ZSkSet) ZIncrScore(member string, value []byte, offset float64) {
+	if node, ok := zs.items[member]; ok {
+		// 删除 再插入
+		score := node.score + offset
+		value := node.value
+		zs.list.SkListDelete(node.score, member)
+		delete(zs.items, member)
+		zs.items[member] = zs.list.SkListInsert(score, member, value)
+	} else {
+		zs.items[member] = zs.list.SkListInsert(offset, member, value)
+	}
+}
+
+func (zs *ZSkSet) ZScore(member string) float64 {
+	if node, ok := zs.items[member]; ok {
+		return node.score
+	}
+	return 0
 }

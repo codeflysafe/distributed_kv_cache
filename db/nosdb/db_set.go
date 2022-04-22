@@ -3,7 +3,16 @@ package nosdb
 import "nosdb/ds"
 
 // ---------------------------------------- set --------------------------------------------------------//
-// Sadd 命令将一个或多个成员元素加入到集合中，已经存在于集合的成员元素将被忽略。
+
+func (db *NosDB) lazySet() {
+	db.listOnce.Do(func() {
+		if db.setIdx == nil {
+			db.setIdx = NewSetIndex()
+		}
+	})
+}
+
+// SAdd 命令将一个或多个成员元素加入到集合中，已经存在于集合的成员元素将被忽略。
 // 假如集合 key 不存在，则创建一个只包含添加的元素作成员的集合。
 func (db *NosDB) SAdd(key string, member string, value []byte) {
 	db.setIdx.Lock()

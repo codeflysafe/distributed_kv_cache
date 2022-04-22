@@ -1,5 +1,6 @@
 package nosdb
 
 const (
-	DB_DIR = "nosdb/buckets"
+	DbDir         = "nosdb/buckets"
+	DefaultIdxCap = 8
 )

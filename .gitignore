@@ -3,3 +3,5 @@ go
 db/bolt
 db/nosdb/ds/linkedlist/cpu.pprof
 db/nosdb/ds/linkedlist/linkedlist.test
+*.txt
+db/nosdb/file/mmap/test.txt
