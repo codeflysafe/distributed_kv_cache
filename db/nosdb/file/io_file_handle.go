@@ -1,18 +1,26 @@
 package file
 
 import (
+	"errors"
 	"io"
-	"nosdb"
 	"os"
 )
 
 type IOFileHandle struct {
-	file *os.File
+	file      *os.File
+	maxLength int
+}
+
+func newIOFileHandle(file *os.File, maxLength int) (FileHandle, error) {
+	return &IOFileHandle{
+		file:      file,
+		maxLength: maxLength,
+	}, nil
 }
 
 func (h *IOFileHandle) checkFile() error {
 	if h.file == nil {
-		return nosdb.FileNotLoadError
+		return errors.New("no such file")
 	}
 	return nil
 }
@@ -20,6 +28,10 @@ func (h *IOFileHandle) checkFile() error {
 func (h *IOFileHandle) ReadAt(offset int64, length int) (data []byte, err error) {
 	err = h.checkFile()
 	if err != nil {
+		return
+	}
+	if h.maxLength < int(offset)+length {
+		err = errors.New(" length out of range ")
 		return
 	}
 	data = make([]byte, length, length)
@@ -38,7 +50,10 @@ func (h *IOFileHandle) WriteAt(offset int64, data []byte) (newOffset int64, err 
 	if err = h.checkFile(); err != nil {
 		return
 	}
-
+	if h.maxLength < int(offset)+len(data) {
+		err = errors.New(" length out of range ")
+		return
+	}
 	_, err = h.file.WriteAt(data, offset)
 	if err != nil {
 		return
