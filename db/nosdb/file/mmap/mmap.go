@@ -2,7 +2,6 @@ package mmap
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"reflect"
 	"unsafe"
@@ -24,29 +23,26 @@ type MMap struct {
 
 // NewMMap 是对 syscall.Mmap 一个简单的封装
 // 返回值是data 或者 error
-func NewMMap(file *os.File, inProt int, length int) (*MMap, error) {
+func NewMMap(file *os.File, inProt int, length int) (mm *MMap, err error) {
 	if file == nil {
-		err := errors.New(" file is nil ")
-		return nil, err
+		err = errors.New(" file is nil ")
+		return
 	}
-	info, err := file.Stat()
+	err = file.Truncate(int64(length))
+	if err != nil {
+		return
+	}
+	var data []byte
+	data, err = mmap(length, inProt, int(file.Fd()), 0)
 	if err != nil {
 		return nil, err
 	}
-	if info.Size() < int64(length) {
-		err = fmt.Errorf(" file size %d less length %d, please check it ", info.Size(), length)
-		return nil, err
-	}
-	data, err := mmap(length, inProt, int(file.Fd()), 0)
-	if err != nil {
-		return nil, err
-	}
-	mm := &MMap{
+	mm = &MMap{
 		data:   data,
 		inProt: inProt,
 		length: length,
 	}
-	return mm, nil
+	return
 }
 
 func (m *MMap) header() *reflect.SliceHeader {

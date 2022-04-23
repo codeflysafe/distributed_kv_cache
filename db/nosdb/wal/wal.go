@@ -10,6 +10,7 @@ import (
 const (
 	ACTIVE_FILE_PREFIX = "active_"
 	WAL_FILE_PREFIX    = "wal_"
+	DIR_PATH           = "log/"
 )
 
 // 文件的一些 配置信息
