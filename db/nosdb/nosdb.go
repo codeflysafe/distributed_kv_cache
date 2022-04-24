@@ -4,27 +4,6 @@ import (
 	"sync"
 )
 
-type ENCODING uint16
-type TYPE uint16
-
-const (
-	// list
-	LINKED_LIST ENCODING = iota
-	SLICE_LIST
-	// zset
-	SKIPLIST
-	// hash
-	MHASH
-)
-const (
-	//===========  type =========
-	LIST TYPE = iota
-	HASH
-	SET
-	ZSET
-	STRING
-)
-
 // kv 存储结构
 type NosDB struct {
 	// 全局的锁

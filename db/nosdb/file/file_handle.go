@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"io"
 	"nosdb/utils"
 	"os"
@@ -11,8 +12,6 @@ type MOD uint8
 const (
 	STANDARD_IO MOD = iota
 	M_MAP
-
-	FILE_MAX_LENGTH = 1 << 20
 )
 
 type FileHandle interface {
@@ -25,9 +24,6 @@ type FileHandle interface {
 }
 
 func NewFileHandle(mod MOD, file *os.File, maxLength int) (FileHandle, error) {
-	if maxLength > FILE_MAX_LENGTH || maxLength <= 0 {
-		maxLength = FILE_MAX_LENGTH
-	}
 	switch mod {
 	case M_MAP:
 		return newMMapFileHandle(file, maxLength)
@@ -37,6 +33,10 @@ func NewFileHandle(mod MOD, file *os.File, maxLength int) (FileHandle, error) {
 }
 
 func OpenFile(mod MOD, path string, fileName string, maxLength int) (FileHandle, error) {
+	if maxLength <= 0 {
+		err := errors.New(" error maxlength ")
+		return nil, err
+	}
 	file, err := utils.Open(path, fileName)
 	if err != nil {
 		return nil, err

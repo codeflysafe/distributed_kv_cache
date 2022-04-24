@@ -1,8 +1,10 @@
 package wal
 
 import (
+	"errors"
 	"fmt"
 	"nosdb/file"
+	"nosdb/snowflake"
 	"nosdb/utils"
 	"sync"
 )
@@ -10,8 +12,12 @@ import (
 const (
 	ACTIVE_FILE_PREFIX = "active_"
 	WAL_FILE_PREFIX    = "wal_"
-	DIR_PATH           = "log/"
+	DIR_PATH           = "./log"
+	CHECKPOINT_MAX_LEN = 64
+	FILE_MAX_LENGTH    = 1 << 20
 )
+
+var node, _ = snowflake.NewNode(1)
 
 // 文件的一些 配置信息
 type Option struct {
@@ -30,7 +36,42 @@ type Logger struct {
 	mod              file.MOD        // 文件的读取模式
 }
 
-// 日志文件中，追加写
+// OpenLogger 从 active_  中恢复文件
+// 如果不存在，则新建
+// 新建时，要传入指定的文件操作模式 mod
+// func OpenLogger(dirPath string, mod file.MOD) (log *Logger, err error) {
+// 	// 从
+// }
+
+// 新建一个 logger
+func NewLogger(activeFileName, dirPath string, offset, maxFileSize int64, mod file.MOD) (log *Logger, err error) {
+	log = &Logger{
+		Option: Option{
+			dirPath:     dirPath,
+			maxFileSize: maxFileSize,
+		},
+		offset:         offset,
+		mod:            mod,
+		activeFileName: activeFileName,
+	}
+	if log.maxFileSize > FILE_MAX_LENGTH || log.maxFileSize <= 0 {
+		log.maxFileSize = FILE_MAX_LENGTH
+	}
+
+	if node == nil {
+		err = errors.New(" generator node error ")
+		return
+	}
+	log.seq = node.Generate().Int64()
+	// activeFileName 不存在， 新建一个
+	if len(activeFileName) == 0 {
+		log.activeFileName = fmt.Sprintf("%s%d.dat", ACTIVE_FILE_PREFIX, log.seq)
+	}
+	log.activeFileHandle, err = file.OpenFile(mod, dirPath, log.activeFileName, int(log.maxFileSize))
+	return
+}
+
+// Append 日志文件中，追加写
 // 如何文件已经满了，则会写入一个新的文件
 func (l *Logger) Append(entry *Entry) (err error) {
 
@@ -57,11 +98,24 @@ func (l *Logger) Append(entry *Entry) (err error) {
 			return
 		}
 		// 新的 数据库文件 名称 active_{seq}.dat
-		newActiveFilePath := fmt.Sprintf("active_%d.dat", ACTIVE_FILE_PREFIX, l.seq)
+		newActiveFilePath := fmt.Sprintf("%s_%d.dat", ACTIVE_FILE_PREFIX, l.seq)
 		l.activeFileHandle, err = file.OpenFile(l.mod, l.dirPath, newActiveFilePath, int(l.maxFileSize))
 	} else {
 		// 还有空间，写入
 		l.offset, err = l.activeFileHandle.WriteAt(l.offset, b)
 	}
 	return
+}
+
+// 关闭logger操作，
+// 这里会释放一些资源，包括文件上下文备份等等
+// todo
+func (l *Logger) Close() error {
+	return l.activeFileHandle.Close()
+}
+
+type FileCheckPoint struct {
+	fileName string   //
+	offset   int64    // 8
+	mod      file.MOD // 2
 }
