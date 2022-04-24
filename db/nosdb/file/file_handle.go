@@ -1,3 +1,9 @@
+/*
+ * @Author: sjhuang
+ * @Date: 2022-04-22 15:15:32
+ * @LastEditTime: 2022-04-24 10:57:18
+ * @FilePath: /nosdb/file/file_handle.go
+ */
 package file
 
 import (
@@ -21,6 +27,7 @@ type FileHandle interface {
 	Sync() error
 	Delete() error
 	IsClose() bool
+	Offset() (int64, error)
 }
 
 func NewFileHandle(mod MOD, file *os.File, maxLength int) (FileHandle, error) {

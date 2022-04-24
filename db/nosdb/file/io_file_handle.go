@@ -1,7 +1,14 @@
+/*
+ * @Author: sjhuang
+ * @Date: 2022-04-22 10:33:13
+ * @LastEditTime: 2022-04-24 11:52:37
+ * @FilePath: /nosdb/file/io_file_handle.go
+ */
 package file
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 )
@@ -32,10 +39,10 @@ func (h *IOFileHandle) ReadAt(offset int64, length int) (data []byte, err error)
 		return
 	}
 	if h.maxLength < int(offset)+length {
-		err = errors.New(" length out of range ")
+		err = fmt.Errorf("length out of range %d %d", offset, h.maxLength)
 		return
 	}
-	data = make([]byte, length, length)
+	data = make([]byte, length)
 	_, err = h.file.ReadAt(data, offset)
 	// ReadAt always returns a non-nil error when n < len(b).
 	// At end of file, that error is io.EOF.
@@ -52,7 +59,7 @@ func (h *IOFileHandle) WriteAt(offset int64, data []byte) (newOffset int64, err 
 		return
 	}
 	if h.maxLength < int(offset)+len(data) {
-		err = errors.New(" length out of range ")
+		err = fmt.Errorf("length out of range %d %d", offset, h.maxLength)
 		return
 	}
 	_, err = h.file.WriteAt(data, offset)
@@ -89,4 +96,12 @@ func (h *IOFileHandle) Delete() error {
 
 func (h *IOFileHandle) IsClose() bool {
 	return h.close
+}
+
+func (h *IOFileHandle) Offset() (int64, error) {
+	f, err := h.file.Stat()
+	if err != nil {
+		return 0, err
+	}
+	return f.Size(), nil
 }

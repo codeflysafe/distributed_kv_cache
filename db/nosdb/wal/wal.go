@@ -44,14 +44,14 @@ type Logger struct {
 // }
 
 // 新建一个 logger
-func NewLogger(activeFileName, dirPath string, offset, maxFileSize int64, mod file.MOD) (log *Logger, err error) {
+func NewLogger(activeFileName, dirPath string, maxFileSize int64, mod file.MOD) (log *Logger, err error) {
 	log = &Logger{
 		Option: Option{
 			dirPath:     dirPath,
 			maxFileSize: maxFileSize,
 		},
-		offset:         offset,
 		mod:            mod,
+		offset:         0,
 		activeFileName: activeFileName,
 	}
 	if log.maxFileSize > FILE_MAX_LENGTH || log.maxFileSize <= 0 {
@@ -63,18 +63,25 @@ func NewLogger(activeFileName, dirPath string, offset, maxFileSize int64, mod fi
 		return
 	}
 	log.seq = node.Generate().Int64()
-	// activeFileName 不存在， 新建一个
+	// activeFileName 不存在
 	if len(activeFileName) == 0 {
-		log.activeFileName = fmt.Sprintf("%s%d.dat", ACTIVE_FILE_PREFIX, log.seq)
+		// 首先去 该文件下面找到一个 active_ 文件
+		if log.activeFileName, err = utils.PrefixPath(dirPath, ACTIVE_FILE_PREFIX); err != nil {
+			// 如果不存在这样的文件，就新建一个
+			log.activeFileName = fmt.Sprintf("%s%d.dat", ACTIVE_FILE_PREFIX, log.seq)
+		}
 	}
 	log.activeFileHandle, err = file.OpenFile(mod, dirPath, log.activeFileName, int(log.maxFileSize))
+	if err != nil {
+		return
+	}
+	log.offset, err = log.activeFileHandle.Offset()
 	return
 }
 
 // Append 日志文件中，追加写
 // 如何文件已经满了，则会写入一个新的文件
 func (l *Logger) Append(entry *Entry) (err error) {
-
 	var b []byte
 	b, err = entry.Encode()
 	if err != nil {
@@ -107,15 +114,14 @@ func (l *Logger) Append(entry *Entry) (err error) {
 	return
 }
 
-// 关闭logger操作，
-// 这里会释放一些资源，包括文件上下文备份等等
-// todo
-func (l *Logger) Close() error {
-	return l.activeFileHandle.Close()
+// 将缓冲区数据刷入文件中
+func (l *Logger) Flush() error {
+	return l.activeFileHandle.Sync()
 }
 
-type FileCheckPoint struct {
-	fileName string   //
-	offset   int64    // 8
-	mod      file.MOD // 2
+// 关闭logger操作，
+func (l *Logger) Close() error {
+	l.Lock()
+	defer l.Unlock()
+	return l.activeFileHandle.Close()
 }

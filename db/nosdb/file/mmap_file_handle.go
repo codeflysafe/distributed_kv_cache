@@ -1,3 +1,9 @@
+/*
+ * @Author: sjhuang
+ * @Date: 2022-04-22 10:56:54
+ * @LastEditTime: 2022-04-24 10:56:50
+ * @FilePath: /nosdb/file/mmap_file_handle.go
+ */
 package file
 
 import (
@@ -83,4 +89,12 @@ func (h *MMapFileHandle) Delete() (err error) {
 }
 func (h *MMapFileHandle) IsClose() bool {
 	return h.close
+}
+
+func (h *MMapFileHandle) Offset() (int64, error) {
+	f, err := h.file.Stat()
+	if err != nil {
+		return 0, err
+	}
+	return f.Size(), nil
 }
