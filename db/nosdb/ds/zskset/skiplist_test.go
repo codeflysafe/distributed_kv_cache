@@ -2,7 +2,6 @@ package zskset
 
 import (
 	"fmt"
-	"nosdb/ds"
 	"testing"
 )
 
@@ -45,11 +44,11 @@ func TestSkLipList_skListFirstInRange(t *testing.T) {
 	sk.SkListInsert(12.0, "sjhuang", []byte("1998"))
 	// 最后一层遍历一下即可
 	sk.skListPrintByLevel()
-	rangSpec := ds.ZRangeSpec{
+	rangSpec := ZRangeSpec{
 		MinScore: 10.0,
 		MaxScore: 11.9,
-		Minex:    false,
-		Maxex:    false,
+		MinEx:    false,
+		MaxEx:    false,
 	}
 	node := sk.skListFirstInRange(rangSpec)
 	if node == nil || node.score != rangSpec.MinScore {
@@ -73,11 +72,11 @@ func TestSkLipList_skListLastInRange(t *testing.T) {
 	sk.SkListInsert(12.0, "sjhuang", []byte("1998"))
 	// 最后一层遍历一下即可
 	sk.skListPrintByLevel()
-	rangSpec := ds.ZRangeSpec{
+	rangSpec := ZRangeSpec{
 		MinScore: 10.0,
 		MaxScore: 11.9,
-		Minex:    false,
-		Maxex:    false,
+		MinEx:    false,
+		MaxEx:    false,
 	}
 	node := sk.skListLastInRange(rangSpec)
 	if node == nil || node.score != 11.0 {
@@ -100,11 +99,11 @@ func TestSkLipList_skListRange(t *testing.T) {
 	sk.SkListInsert(12.0, "sjhuang", []byte("1998"))
 	// 最后一层遍历一下即可
 	sk.skListPrintByLevel()
-	rangSpec := ds.ZRangeSpec{
+	rangSpec := ZRangeSpec{
 		MinScore: 29.0,
 		MaxScore: 30.0,
-		Minex:    false,
-		Maxex:    false,
+		MinEx:    false,
+		MaxEx:    false,
 	}
 	nodes := sk.skListRange(rangSpec)
 	for _, node := range nodes {

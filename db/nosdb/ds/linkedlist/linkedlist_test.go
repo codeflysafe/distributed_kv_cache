@@ -141,7 +141,10 @@ func TestList_ListSeek(t *testing.T) {
 		t.Errorf(" error lens %d", list.LLen())
 	}
 
-	val := list.ListSeek(30)
+	val, err := list.ListSeek(30)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println("val is", string(val))
 	if string(val) != "30" {
 		t.Errorf(" error value %s", string(val))
@@ -160,14 +163,20 @@ func TestList_ListDelIndex(t *testing.T) {
 		t.Errorf(" error lens %d", list.LLen())
 	}
 
-	val := list.ListSeek(30)
+	val, err := list.ListSeek(30)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println("val is", string(val))
 	if string(val) != "30" {
 		t.Errorf(" error value %s", string(val))
 	}
 
 	list.ListDelIndex(30)
-	val = list.ListSeek(30)
+	val, err = list.ListSeek(30)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println("val is", string(val))
 	if string(val) != "31" {
 		t.Errorf(" error value %s", string(val))

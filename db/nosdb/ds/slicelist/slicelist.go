@@ -1,5 +1,7 @@
 package slicelist
 
+import "errors"
+
 const (
 	SLICE_LEN = 8
 )
@@ -85,13 +87,14 @@ func (sl *SliceList) RPeek() (value []byte) {
 
 // idx >= 0
 // idx < 0 -1 代表最后一个
-func (sl *SliceList) ListSeek(idx int) (value []byte) {
+func (sl *SliceList) ListSeek(idx int) (value []byte, err error) {
 	l := sl.LLen()
 	var index = idx
 	if idx < 0 {
 		index = l + idx
 	}
 	if l < index {
+		err = errors.New(" out of range")
 		return
 	}
 	if len(sl.left) <= index {

@@ -1,3 +1,9 @@
+/*
+ * @Author: sjhuang
+ * @Date: 2022-04-20 18:49:39
+ * @LastEditTime: 2022-04-24 15:05:22
+ * @FilePath: /nosdb/db_zset.go
+ */
 package nosdb
 
 import "nosdb/ds"
@@ -17,6 +23,7 @@ func (db *NosDB) lazyZSet() {
 //分数值可以是整数值或双精度浮点数。
 //如果有序集合 key 不存在，则创建一个空的有序集并执行 ZAdd 操作
 func (db *NosDB) ZAdd(key string, score float64, member string, value []byte) {
+	db.lazyZSet()
 	db.zSetIdx.Lock()
 	defer db.zSetIdx.Unlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
@@ -30,6 +37,7 @@ func (db *NosDB) ZAdd(key string, score float64, member string, value []byte) {
 
 // ZCard 获取有序集合的成员数
 func (db *NosDB) ZCard(key string) int {
+	db.lazyZSet()
 	db.zSetIdx.RLock()
 	defer db.zSetIdx.RUnlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
@@ -40,6 +48,7 @@ func (db *NosDB) ZCard(key string) int {
 
 // ZCount 命令用于计算有序集合中指定分数区间的成员数量。
 func (db *NosDB) ZCount(key string, minScore, maxSCore float64) int {
+	db.lazyZSet()
 	db.zSetIdx.RLock()
 	defer db.zSetIdx.RUnlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
@@ -53,6 +62,7 @@ func (db *NosDB) ZCount(key string, minScore, maxSCore float64) int {
 //当 key 不存在，或分数不是 key 的成员时， ZIncrScore key increment member 等同于 ZAdd key increment member 。
 //分数值可以是整数值或双精度浮点数。
 func (db *NosDB) ZIncrScore(key string, member string, value []byte, offset float64) {
+	db.lazyZSet()
 	db.zSetIdx.Lock()
 	defer db.zSetIdx.Unlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
@@ -67,6 +77,7 @@ func (db *NosDB) ZIncrScore(key string, member string, value []byte, offset floa
 // ZScore 命令返回有序集中，成员的分数值。
 //如果成员元素不是有序集 key 的成员，或 key 不存在，返回 nil 。
 func (db *NosDB) ZScore(key string, member string) float64 {
+	db.lazyZSet()
 	db.zSetIdx.RLock()
 	defer db.zSetIdx.RUnlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
