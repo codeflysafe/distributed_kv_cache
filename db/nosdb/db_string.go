@@ -6,9 +6,7 @@ import "nosdb/ds"
 
 func (db *NosDB) lazyStr() {
 	db.strOnce.Do(func() {
-		if db.strIdx == nil {
-			db.strIdx = NewStringIndex()
-		}
+		db.strIdx = NewStringIndex()
 	})
 }
 

@@ -13,9 +13,7 @@ import (
 // 这个时候，要使用 sync.Once
 func (db *NosDB) lazyList() {
 	db.listOnce.Do(func() {
-		if db.listIdx == nil {
-			db.listIdx = NewListIndex()
-		}
+		db.listIdx = NewListIndex()
 	})
 }
 

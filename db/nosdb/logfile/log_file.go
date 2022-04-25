@@ -37,7 +37,7 @@ type LogFile struct {
 }
 
 // 从上下文恢复
-func ReOpenWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *LogFile, err error) {
+func ReOpenLogFile(dirPath string, maxFileSize int64, mod file.MOD) (log *LogFile, err error) {
 	log = &LogFile{
 		RWMutex: sync.RWMutex{},
 		Option:  Option{dirPath: dirPath, maxFileSize: maxFileSize},
@@ -125,6 +125,31 @@ func (l *LogFile) Append(entry *LogEntry) (err error) {
 		// 还有空间，写入
 		l.offset, err = l.activeFileHandle.WriteAt(l.offset, b)
 	}
+	return
+}
+
+// 从 offset 处读出 entry
+// 包含两次文件读
+func (l *LogFile) ReadAt(offset int64) (e *LogEntry, err error) {
+	// 读锁
+	l.RLock()
+	defer l.RUnlock()
+	var b []byte
+	// 1. 先从文件中读出对应的 offset
+	if b, err = l.activeFileHandle.ReadAt(offset, EntryMetaSize); err != nil {
+		return
+	}
+	// 2.解析 读出的 []byte
+	if e, err = DecodeMeta(b); err != nil {
+		return
+	}
+	offset += EntryMetaSize
+	// 3. 在从文件中读出， key 和 value
+	if e.Key, err = l.activeFileHandle.ReadAt(offset, int(e.KeySize)); err != nil {
+		return
+	}
+	offset += int64(e.KeySize)
+	e.Value, err = l.activeFileHandle.ReadAt(offset, int(e.KeySize))
 	return
 }
 

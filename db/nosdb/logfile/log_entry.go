@@ -7,19 +7,16 @@ import (
 	"time"
 )
 
-// 4 + 8 + 4 + 4 + 4 + 2 + 2 + 2
-const EntryMeraSize = 30
+// 4 + 8 + 4 + 4 + 4 + 2 + 1 + 1
+const EntryMetaSize = 28
 
-type MARK uint16
+type CMD uint16
 
 const (
-	PUT MARK = iota
-	DEL
-
 	Persistent uint32 = 0
 )
 
-type ENCODING uint16
+type ENCODING uint8
 
 const (
 	// list
@@ -32,7 +29,7 @@ const (
 	B_STRING
 )
 
-type TYPE uint16
+type TYPE uint8
 
 const (
 	//===========  type =========
@@ -50,20 +47,20 @@ type Meta struct {
 	TTL       uint32   // 定时时间, 0 代表用不过期
 	KeySize   uint32   // key 的长度
 	ValueSize uint32   // value 长度
-	Mark      MARK     // 标记，PUT or DEL
-	Encoding  ENCODING // 底层数据结构，编码类型
-	Ty        TYPE     // 存储类型， List, Set, ZSet, Hash, String
-	TxId      uint64   // 事务id
-	Commit    uint8    // 是否提交修改
+	cmd       CMD      // 标记，PUT or DEL
+	Ty        TYPE     // 存储类型， List, Set, ZSet, Hash, String, 高 8 位
+	Encoding  ENCODING // 底层数据结构，编码类型， 低 8 位
 }
 
-// 一个存储条目 Entry
 //  the Entry stored format:
-//  |----------------------------------------------------------------------------------------------------------------|
-//  |  crc  | timestamp | keysize | valueSize | mark   | TTL  |bucketSize| status | ds   | txId |  bucket |  key  | value |
-//  |----------------------------------------------------------------------------------------------------------------|
-//  | uint32| uint64    |uint32   |  uint32   | uint16 | uint32| uint32 | uint16 | uint16 |uint64 |[]byte|[]byte | []byte |
-//  |----------------------------------------------------------------------------------------------------------------|
+//           |------------------------------------META------------------------------------|
+//  |-------------------------------------------------------------------------------------------------------|
+//  |   crc  | timestamp |   TTL   |  keySize  |  valueSize  |  cmd   |   Ty   | Encoding |  key  |  value  |
+//  |-------------------------------------------------------------------------------------------------------|
+//  | uint32 |  uint64   | uint32  |   uint32  |   uint32    | uint16 | uint16 |  uint16  | []byte | []byte |
+//  |-------------------------------------------------------------------------------------------------------|
+//  |---crc--|----------------------------------------------------------------------------------------------|
+//
 type LogEntry struct {
 	Meta
 	Key   []byte
@@ -71,7 +68,7 @@ type LogEntry struct {
 }
 
 // NewEntry 新建一条记录
-func NewLogEntry(key, value []byte, mark MARK, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
+func NewLogEntry(key, value []byte, cmd CMD, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
 	return &LogEntry{
 		Key:   key,
 		Value: value,
@@ -80,7 +77,7 @@ func NewLogEntry(key, value []byte, mark MARK, TTL uint32, encoding ENCODING, ty
 			TTL:       TTL,
 			KeySize:   uint32(len(key)),
 			ValueSize: uint32(len(value)),
-			Mark:      mark,
+			cmd:       cmd,
 			Encoding:  encoding,
 			Ty:        ty,
 		},
@@ -96,7 +93,7 @@ func (e *LogEntry) GetCRC(buf []byte) uint32 {
 
 // GetSize 返回长度
 func (e *LogEntry) GetSize() int64 {
-	return (int64)(EntryMeraSize + e.KeySize + e.ValueSize)
+	return (int64)(EntryMetaSize + e.KeySize + e.ValueSize)
 }
 
 // Encode 编码，返回字节数组
@@ -106,19 +103,17 @@ func (e *LogEntry) Encode() ([]byte, error) {
 	binary.BigEndian.PutUint32(buf[12:16], e.TTL)
 	binary.BigEndian.PutUint32(buf[16:20], e.KeySize)
 	binary.BigEndian.PutUint32(buf[20:24], e.ValueSize)
-	binary.BigEndian.PutUint32(buf[20:24], e.ValueSize)
-	binary.BigEndian.PutUint16(buf[24:26], uint16(e.Mark))
-	binary.BigEndian.PutUint16(buf[26:28], uint16(e.Ty))
-	binary.BigEndian.PutUint16(buf[28:30], uint16(e.Encoding))
-	copy(buf[EntryMeraSize:EntryMeraSize+e.KeySize], e.Key)
-	copy(buf[EntryMeraSize+e.KeySize:], e.Value)
+	binary.BigEndian.PutUint16(buf[24:26], uint16(e.cmd))
+	binary.BigEndian.PutUint16(buf[26:28], (uint16(e.Ty)<<8)|uint16(e.Encoding))
+	copy(buf[EntryMetaSize:EntryMetaSize+e.KeySize], e.Key)
+	copy(buf[EntryMetaSize+e.KeySize:], e.Value)
 	binary.BigEndian.PutUint32(buf[0:4], e.GetCRC(buf[4:]))
 	return buf, nil
 }
 
 // DecodeMeta 将字节流解码为 entry meta 实体
 func DecodeMeta(buf []byte) (entry *LogEntry, err error) {
-	if len(buf) != EntryMeraSize {
+	if len(buf) != EntryMetaSize {
 		err = fmt.Errorf(" len is not match ")
 		return
 	}
@@ -128,9 +123,9 @@ func DecodeMeta(buf []byte) (entry *LogEntry, err error) {
 	entry.TTL = binary.BigEndian.Uint32(buf[12:16])
 	entry.KeySize = binary.BigEndian.Uint32(buf[16:20])
 	entry.ValueSize = binary.BigEndian.Uint32(buf[20:24])
-	entry.Mark = (MARK)(binary.BigEndian.Uint32(buf[24:26]))
-	entry.Ty = (TYPE)(binary.BigEndian.Uint32(buf[26:28]))
-	entry.Encoding = (ENCODING)(binary.BigEndian.Uint32(buf[28:30]))
+	entry.cmd = (CMD)(binary.BigEndian.Uint16(buf[24:26]))
+	entry.Ty = (TYPE)(binary.BigEndian.Uint16(buf[26:28]) >> 8)      //取高8位直接截断
+	entry.Encoding = (ENCODING)(binary.BigEndian.Uint16(buf[26:28])) // 直接截断
 	return
 }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-20 18:49:39
- * @LastEditTime: 2022-04-24 15:05:22
+ * @LastEditTime: 2022-04-25 11:46:34
  * @FilePath: /nosdb/db_zset.go
  */
 package nosdb
@@ -12,9 +12,7 @@ import "nosdb/ds"
 
 func (db *NosDB) lazyZSet() {
 	db.zSetOnce.Do(func() {
-		if db.zSetIdx == nil {
-			db.zSetIdx = NewZSetIndex()
-		}
+		db.zSetIdx = NewZSetIndex()
 	})
 }
 

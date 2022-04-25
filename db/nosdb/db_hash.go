@@ -9,9 +9,7 @@ import (
 // 懒加载 hash 结构
 func (db *NosDB) lazyHash() {
 	db.hashOnce.Do(func() {
-		if db.hashIdx == nil {
-			db.hashIdx = NewHashIndex()
-		}
+		db.hashIdx = NewHashIndex()
 	})
 }
 
