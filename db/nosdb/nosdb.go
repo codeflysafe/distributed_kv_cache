@@ -1,14 +1,14 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-15 20:41:59
- * @LastEditTime: 2022-04-24 15:13:49
+ * @LastEditTime: 2022-04-25 10:27:14
  * @FilePath: /nosdb/nosdb.go
  */
 package nosdb
 
 import (
 	"nosdb/file"
-	"nosdb/wal"
+	"nosdb/logfile"
 	"sync"
 )
 
@@ -34,11 +34,13 @@ type NosDB struct {
 	// lru 策略
 
 	// wal 日志文件模块
-	walLogger *wal.WalLogger
-	mod       file.MOD // 操作日志文件的mod
+	logFile *logfile.LogFile
+	mod     file.MOD // 操作日志文件的mod
 }
 
 func NewNosDB() *NosDB {
-	db := new(NosDB)
-	db.walLogger = wal.NewWalLogger()
+	// var err error
+	// db := new(NosDB)
+	// db.walLogger, err = logfile.NewWalLogger()
+	return nil
 }

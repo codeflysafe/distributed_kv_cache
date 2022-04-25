@@ -1,4 +1,4 @@
-package wal
+package logfile
 
 import (
 	"encoding/binary"
@@ -64,15 +64,15 @@ type Meta struct {
 //  |----------------------------------------------------------------------------------------------------------------|
 //  | uint32| uint64    |uint32   |  uint32   | uint16 | uint32| uint32 | uint16 | uint16 |uint64 |[]byte|[]byte | []byte |
 //  |----------------------------------------------------------------------------------------------------------------|
-type WalEntry struct {
+type LogEntry struct {
 	Meta
 	Key   []byte
 	Value []byte
 }
 
 // NewEntry 新建一条记录
-func NewWalEntry(key, value []byte, mark MARK, TTL uint32, encoding ENCODING, ty TYPE) *WalEntry {
-	return &WalEntry{
+func NewLogEntry(key, value []byte, mark MARK, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
+	return &LogEntry{
 		Key:   key,
 		Value: value,
 		Meta: Meta{
@@ -90,17 +90,17 @@ func NewWalEntry(key, value []byte, mark MARK, TTL uint32, encoding ENCODING, ty
 // GetCRC 计算 crc32
 // buf 要检验的字节流
 // 返回 校验结果
-func (e *WalEntry) GetCRC(buf []byte) uint32 {
+func (e *LogEntry) GetCRC(buf []byte) uint32 {
 	return crc32.ChecksumIEEE(buf)
 }
 
 // GetSize 返回长度
-func (e *WalEntry) GetSize() int64 {
+func (e *LogEntry) GetSize() int64 {
 	return (int64)(EntryMeraSize + e.KeySize + e.ValueSize)
 }
 
 // Encode 编码，返回字节数组
-func (e *WalEntry) Encode() ([]byte, error) {
+func (e *LogEntry) Encode() ([]byte, error) {
 	buf := make([]byte, e.GetSize())
 	binary.BigEndian.PutUint64(buf[4:12], e.Timestamp)
 	binary.BigEndian.PutUint32(buf[12:16], e.TTL)
@@ -117,12 +117,12 @@ func (e *WalEntry) Encode() ([]byte, error) {
 }
 
 // DecodeMeta 将字节流解码为 entry meta 实体
-func DecodeMeta(buf []byte) (entry *WalEntry, err error) {
+func DecodeMeta(buf []byte) (entry *LogEntry, err error) {
 	if len(buf) != EntryMeraSize {
 		err = fmt.Errorf(" len is not match ")
 		return
 	}
-	entry = &WalEntry{}
+	entry = &LogEntry{}
 	entry.CRC = binary.BigEndian.Uint32(buf[0:4])
 	entry.Timestamp = binary.BigEndian.Uint64(buf[4:12])
 	entry.TTL = binary.BigEndian.Uint32(buf[12:16])
@@ -135,7 +135,7 @@ func DecodeMeta(buf []byte) (entry *WalEntry, err error) {
 }
 
 // CheckCRC 核对 crc
-func (e *WalEntry) CheckCRC(buf []byte) bool {
+func (e *LogEntry) CheckCRC(buf []byte) bool {
 	// 更新新的crc
 	crc := e.GetCRC(buf)
 	return crc == e.CRC

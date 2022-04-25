@@ -1,4 +1,4 @@
-package wal
+package logfile
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ type Option struct {
 }
 
 // 使用 write ahead log 的方法，来实现数据库的原子性和持久性操作
-type WalLogger struct {
+type LogFile struct {
 	sync.RWMutex                     // 读写锁，并发控制
 	Option                           // 文件的一些信息
 	seq              int64           // 文件的序号
@@ -36,16 +36,9 @@ type WalLogger struct {
 	Node             *snowflake.Node // 用于生成 seq 的 node
 }
 
-// OpenLogger 从 active_  中恢复文件
-// 如果不存在，则新建
-// 新建时，要传入指定的文件操作模式 mod
-// func OpenLogger(dirPath string, mod file.MOD) (log *Logger, err error) {
-// 	// 从
-// }
-
 // 从上下文恢复
-func ReOpenWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *WalLogger, err error) {
-	log = &WalLogger{
+func ReOpenWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *LogFile, err error) {
+	log = &LogFile{
 		RWMutex: sync.RWMutex{},
 		Option:  Option{dirPath: dirPath, maxFileSize: maxFileSize},
 		mod:     mod,
@@ -76,8 +69,8 @@ func ReOpenWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *WalL
 }
 
 // 新建一个 logger
-func NewWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *WalLogger, err error) {
-	log = &WalLogger{
+func NewLogFile(dirPath string, maxFileSize int64, mod file.MOD) (log *LogFile, err error) {
+	log = &LogFile{
 		RWMutex:          sync.RWMutex{},
 		Option:           Option{dirPath: dirPath, maxFileSize: maxFileSize},
 		seq:              0,
@@ -100,7 +93,7 @@ func NewWalLogger(dirPath string, maxFileSize int64, mod file.MOD) (log *WalLogg
 
 // Append 日志文件中，追加写
 // 如何文件已经满了，则会写入一个新的文件
-func (l *WalLogger) Append(entry *WalEntry) (err error) {
+func (l *LogFile) Append(entry *LogEntry) (err error) {
 	var b []byte
 	b, err = entry.Encode()
 	if err != nil {
@@ -136,12 +129,12 @@ func (l *WalLogger) Append(entry *WalEntry) (err error) {
 }
 
 // 将缓冲区数据刷入文件中
-func (l *WalLogger) Flush() error {
+func (l *LogFile) Flush() error {
 	return l.activeFileHandle.Sync()
 }
 
 // 关闭logger操作，
-func (l *WalLogger) Close() error {
+func (l *LogFile) Close() error {
 	l.Lock()
 	defer l.Unlock()
 	return l.activeFileHandle.Close()

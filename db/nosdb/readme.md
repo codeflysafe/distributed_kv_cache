@@ -1,14 +1,16 @@
 <!--
  * @Author: sjhuang
  * @Date: 2022-04-12 21:29:10
- * @LastEditTime: 2022-04-24 15:08:08
+ * @LastEditTime: 2022-04-25 10:29:46
  * @FilePath: /nosdb/readme.md
 -->
 # notsdb
 
 ![](https://raw.githubusercontent.com/codeflysafe/gitalk/main/img/20220412215321.png)
 
-`not simple db`, 一个基于`go`语言的`k/v`数据库
+`not simple db`, A high performance NoSQL database based on `bitcask`, supports string, list, hash, set, and zset.
+
+
 
 ## 文件树
 
@@ -92,3 +94,8 @@
 ## Plan
 - [ ] bitcask\ B+Tree\ LSM_Tree 了解和学习
 - [x] 参考 redis 实现基本数据结构 ziplist\skiplist\linkedlist\string
+
+
+## 参考
+[rosedb](https://github.com/flower-corp/rosedb)
+[nutsdb](https://github.com/nutsdb/nutsdb)
