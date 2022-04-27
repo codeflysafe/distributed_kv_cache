@@ -1,3 +1,9 @@
+/*
+ * @Author: sjhuang
+ * @Date: 2022-04-19 09:30:36
+ * @LastEditTime: 2022-04-27 10:43:25
+ * @FilePath: /nosdb/ds/set/mset.go
+ */
 package set
 
 const (
@@ -44,4 +50,9 @@ func (ms *MSet) SPop() []byte {
 // 移除集合中一个或多个成员
 func (ms *MSet) SRem(member string) {
 	delete(ms.Items, member)
+}
+
+func (ms *MSet) SIsMember(member string) bool {
+	_, ok := ms.Items[member]
+	return ok
 }

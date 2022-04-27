@@ -1,7 +1,7 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-20 18:00:34
- * @LastEditTime: 2022-04-25 11:46:26
+ * @LastEditTime: 2022-04-27 10:44:43
  * @FilePath: /nosdb/db_set.go
  */
 package nosdb
@@ -18,10 +18,11 @@ func (db *NosDB) lazySet() {
 
 // SAdd 命令将一个或多个成员元素加入到集合中，已经存在于集合的成员元素将被忽略。
 // 假如集合 key 不存在，则创建一个只包含添加的元素作成员的集合。
-func (db *NosDB) SAdd(key string, member string, value []byte) {
+func (db *NosDB) SAdd(key string, value []byte) {
 	db.lazySet()
 	db.setIdx.Lock()
 	defer db.setIdx.Unlock()
+	member := string(value)
 	if obj, ok := db.setIdx.kv[key]; ok {
 		obj.SAdd(member, value)
 	} else {
@@ -43,9 +44,16 @@ func (db *NosDB) SCard(key string) int {
 	return 0
 }
 
-// todo
-func (db *NosDB) SIsMember(key string, member string) bool {
+// 判断是否为容器中的元素
+func (db *NosDB) SIsMember(key string, value []byte) bool {
 	db.lazySet()
+	db.setIdx.RLock()
+	defer db.setIdx.RUnlock()
+	member := string(value)
+	if obj, ok := db.setIdx.kv[key]; ok {
+		return obj.SIsMember(member)
+	}
+
 	return false
 }
 
@@ -62,11 +70,11 @@ func (db *NosDB) SPop(key string) []byte {
 }
 
 // 移除集合中一个元素
-// todo member 是啥？ 如何设计，这都是一个很大的问题
-func (db *NosDB) SRem(key string, member string) {
+func (db *NosDB) SRem(key string, value []byte) {
 	db.lazySet()
 	db.setIdx.Lock()
 	defer db.setIdx.Unlock()
+	member := string(value)
 	if obj, ok := db.setIdx.kv[key]; ok {
 		obj.SRem(member)
 	}

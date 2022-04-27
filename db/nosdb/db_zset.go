@@ -1,12 +1,14 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-20 18:49:39
- * @LastEditTime: 2022-04-25 11:46:34
+ * @LastEditTime: 2022-04-27 10:30:19
  * @FilePath: /nosdb/db_zset.go
  */
 package nosdb
 
-import "nosdb/ds"
+import (
+	"nosdb/ds"
+)
 
 // ==================== ZSet ==================
 
@@ -20,10 +22,12 @@ func (db *NosDB) lazyZSet() {
 //如果某个成员已经是有序集的成员，那么更新这个成员的分数值，并通过重新插入这个成员元素，来保证该成员在正确的位置上。
 //分数值可以是整数值或双精度浮点数。
 //如果有序集合 key 不存在，则创建一个空的有序集并执行 ZAdd 操作
-func (db *NosDB) ZAdd(key string, score float64, member string, value []byte) {
+func (db *NosDB) ZAdd(key string, score float64, value []byte) {
 	db.lazyZSet()
 	db.zSetIdx.Lock()
 	defer db.zSetIdx.Unlock()
+	// 参照 bytes.Equal()， 实际上可能有更加高效的方法？？？
+	member := string(value)
 	if obj, ok := db.zSetIdx.kv[key]; ok {
 		obj.ZAdd(score, member, value)
 	} else {
@@ -59,10 +63,11 @@ func (db *NosDB) ZCount(key string, minScore, maxSCore float64) int {
 //可以通过传递一个负数值 increment ，让分数减去相应的值，比如 ZIncrScore key -5 member ，就是让 member 的 score 值减去 5 。
 //当 key 不存在，或分数不是 key 的成员时， ZIncrScore key increment member 等同于 ZAdd key increment member 。
 //分数值可以是整数值或双精度浮点数。
-func (db *NosDB) ZIncrScore(key string, member string, value []byte, offset float64) {
+func (db *NosDB) ZIncrScore(key string, value []byte, offset float64) {
 	db.lazyZSet()
 	db.zSetIdx.Lock()
 	defer db.zSetIdx.Unlock()
+	member := string(value)
 	if obj, ok := db.zSetIdx.kv[key]; ok {
 		obj.ZIncrScore(member, value, offset)
 	} else {
@@ -74,11 +79,12 @@ func (db *NosDB) ZIncrScore(key string, member string, value []byte, offset floa
 
 // ZScore 命令返回有序集中，成员的分数值。
 //如果成员元素不是有序集 key 的成员，或 key 不存在，返回 nil 。
-func (db *NosDB) ZScore(key string, member string) float64 {
+func (db *NosDB) ZScore(key string, value []byte) float64 {
 	db.lazyZSet()
 	db.zSetIdx.RLock()
 	defer db.zSetIdx.RUnlock()
 	if obj, ok := db.zSetIdx.kv[key]; ok {
+		member := string(value)
 		return obj.ZScore(member)
 	}
 	return 0

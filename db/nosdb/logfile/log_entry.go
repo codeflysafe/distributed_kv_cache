@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// 4 + 8 + 4 + 4 + 4 + 2 + 1 + 1
-const EntryMetaSize = 28
+// 4 + 8 + 4 + 4 + 4 + 4 + 2 + 1 + 1
+const EntryMetaSize = 32
 
 type CMD uint16
 
@@ -46,10 +46,13 @@ type Meta struct {
 	Timestamp uint64   // 时间戳
 	TTL       uint32   // 定时时间, 0 代表用不过期
 	KeySize   uint32   // key 的长度
+	MemSize   uint32   // Member size
 	ValueSize uint32   // value 长度
 	cmd       CMD      // 标记，PUT or DEL
 	Ty        TYPE     // 存储类型， List, Set, ZSet, Hash, String, 高 8 位
 	Encoding  ENCODING // 底层数据结构，编码类型， 低 8 位
+	Score     float64  // zset 结构使用
+	Member    []byte   // hash 结构时使用
 }
 
 //  the Entry stored format:
@@ -68,7 +71,7 @@ type LogEntry struct {
 }
 
 // NewEntry 新建一条记录
-func NewLogEntry(key, value []byte, cmd CMD, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
+func NewLogEntry(key, member, value []byte, score float64, cmd CMD, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
 	return &LogEntry{
 		Key:   key,
 		Value: value,
@@ -80,6 +83,9 @@ func NewLogEntry(key, value []byte, cmd CMD, TTL uint32, encoding ENCODING, ty T
 			cmd:       cmd,
 			Encoding:  encoding,
 			Ty:        ty,
+			Member:    member,
+			Score:     score,
+			MemSize:   uint32(len(member)),
 		},
 	}
 }
@@ -102,9 +108,10 @@ func (e *LogEntry) Encode() ([]byte, error) {
 	binary.BigEndian.PutUint64(buf[4:12], e.Timestamp)
 	binary.BigEndian.PutUint32(buf[12:16], e.TTL)
 	binary.BigEndian.PutUint32(buf[16:20], e.KeySize)
-	binary.BigEndian.PutUint32(buf[20:24], e.ValueSize)
-	binary.BigEndian.PutUint16(buf[24:26], uint16(e.cmd))
-	binary.BigEndian.PutUint16(buf[26:28], (uint16(e.Ty)<<8)|uint16(e.Encoding))
+	binary.BigEndian.PutUint32(buf[20:24], e.MemSize)
+	binary.BigEndian.PutUint32(buf[24:28], e.ValueSize)
+	binary.BigEndian.PutUint16(buf[28:30], uint16(e.cmd))
+	binary.BigEndian.PutUint16(buf[30:32], (uint16(e.Ty)<<8)|uint16(e.Encoding))
 	copy(buf[EntryMetaSize:EntryMetaSize+e.KeySize], e.Key)
 	copy(buf[EntryMetaSize+e.KeySize:], e.Value)
 	binary.BigEndian.PutUint32(buf[0:4], e.GetCRC(buf[4:]))

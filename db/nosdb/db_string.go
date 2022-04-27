@@ -145,3 +145,13 @@ func (db *NosDB) Append(key string, value []byte) {
 		return
 	}
 }
+
+// Del 删除指定 key 的value
+func (db *NosDB) Del(key string) {
+	db.lazyStr()
+	db.strIdx.Lock()
+	defer db.strIdx.Unlock()
+	if _, ok := db.strIdx.kv[key]; ok {
+		delete(db.hashIdx.kv, key)
+	}
+}
