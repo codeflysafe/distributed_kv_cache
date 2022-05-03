@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"hash/crc32"
+	"strconv"
 	"time"
 )
 
@@ -51,18 +52,18 @@ type Meta struct {
 	cmd       CMD      // 标记，PUT or DEL
 	Ty        TYPE     // 存储类型， List, Set, ZSet, Hash, String, 高 8 位
 	Encoding  ENCODING // 底层数据结构，编码类型， 低 8 位
-	Score     float64  // zset 结构使用
+	Score     float64  // zset 结构使用, 存储为 string 类型
 	Member    []byte   // hash 结构时使用
 }
 
 //  the Entry stored format:
-//           |------------------------------------META------------------------------------|
-//  |-------------------------------------------------------------------------------------------------------|
-//  |   crc  | timestamp |   TTL   |  keySize  |  valueSize  |  cmd   |   Ty   | Encoding |  key  |  value  |
-//  |-------------------------------------------------------------------------------------------------------|
-//  | uint32 |  uint64   | uint32  |   uint32  |   uint32    | uint16 | uint16 |  uint16  | []byte | []byte |
-//  |-------------------------------------------------------------------------------------------------------|
-//  |---crc--|----------------------------------------------------------------------------------------------|
+//           |------------------------------------META----------------------------------------------|
+//  |---------------------------------------------------------------------------------------------------------------------------------|
+//  |   crc  | timestamp |   TTL   |  keySize  |  memSize | valueSize  |  cmd   |   Ty   | Encoding |  key  |  value  | score/ member |
+//  |---------------------------------------------------------------------------------------------------------------------------------|
+//  | uint32 |  uint64   | uint32  |   uint32  |   uint32 |   uint32   | uint16 | uint16 |  uint16  | []byte | []byte |     []byte    |
+//  |-------------------------------------------------------------------------------------------------------|-------------------------|
+//  |---crc--|------------------------------------------------------------------------------------------------------------------------|
 //
 type LogEntry struct {
 	Meta
@@ -72,7 +73,7 @@ type LogEntry struct {
 
 // NewEntry 新建一条记录
 func NewLogEntry(key, member, value []byte, score float64, cmd CMD, TTL uint32, encoding ENCODING, ty TYPE) *LogEntry {
-	return &LogEntry{
+	e := &LogEntry{
 		Key:   key,
 		Value: value,
 		Meta: Meta{
@@ -85,9 +86,15 @@ func NewLogEntry(key, member, value []byte, score float64, cmd CMD, TTL uint32, 
 			Ty:        ty,
 			Member:    member,
 			Score:     score,
-			MemSize:   uint32(len(member)),
 		},
 	}
+	if e.Ty == HASH {
+		e.MemSize = uint32(len(member))
+	} else if e.Ty == ZSET {
+		score := strconv.FormatFloat(e.Score, 'g', -1, 64)
+		e.MemSize = uint32(len(score))
+	}
+	return e
 }
 
 // GetCRC 计算 crc32
@@ -113,7 +120,14 @@ func (e *LogEntry) Encode() ([]byte, error) {
 	binary.BigEndian.PutUint16(buf[28:30], uint16(e.cmd))
 	binary.BigEndian.PutUint16(buf[30:32], (uint16(e.Ty)<<8)|uint16(e.Encoding))
 	copy(buf[EntryMetaSize:EntryMetaSize+e.KeySize], e.Key)
-	copy(buf[EntryMetaSize+e.KeySize:], e.Value)
+	copy(buf[EntryMetaSize+e.KeySize:EntryMetaSize+e.KeySize+e.ValueSize], e.Value)
+	// 如果是 zset， score 字段
+	if e.Ty == ZSET {
+		score := strconv.FormatFloat(e.Score, 'g', -1, 64)
+		copy(buf[EntryMetaSize+e.KeySize+e.ValueSize:], []byte(score))
+	} else if e.Ty == HASH {
+		copy(buf[EntryMetaSize+e.KeySize+e.ValueSize:], e.Member)
+	}
 	binary.BigEndian.PutUint32(buf[0:4], e.GetCRC(buf[4:]))
 	return buf, nil
 }
@@ -129,10 +143,11 @@ func DecodeMeta(buf []byte) (entry *LogEntry, err error) {
 	entry.Timestamp = binary.BigEndian.Uint64(buf[4:12])
 	entry.TTL = binary.BigEndian.Uint32(buf[12:16])
 	entry.KeySize = binary.BigEndian.Uint32(buf[16:20])
-	entry.ValueSize = binary.BigEndian.Uint32(buf[20:24])
-	entry.cmd = (CMD)(binary.BigEndian.Uint16(buf[24:26]))
-	entry.Ty = (TYPE)(binary.BigEndian.Uint16(buf[26:28]) >> 8)      //取高8位直接截断
-	entry.Encoding = (ENCODING)(binary.BigEndian.Uint16(buf[26:28])) // 直接截断
+	entry.MemSize = binary.BigEndian.Uint32(buf[20:24])
+	entry.ValueSize = binary.BigEndian.Uint32(buf[24:28])
+	entry.cmd = (CMD)(binary.BigEndian.Uint16(buf[28:30]))
+	entry.Ty = (TYPE)(binary.BigEndian.Uint16(buf[30:32]) >> 8)      //取高8位直接截断
+	entry.Encoding = (ENCODING)(binary.BigEndian.Uint16(buf[30:32])) // 直接截断
 	return
 }
 

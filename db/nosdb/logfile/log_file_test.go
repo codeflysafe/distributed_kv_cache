@@ -1,7 +1,7 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-23 12:10:58
- * @LastEditTime: 2022-04-25 11:50:57
+ * @LastEditTime: 2022-04-28 11:04:25
  * @FilePath: /nosdb/logfile/log_file_test.go
  */
 package logfile
@@ -29,7 +29,7 @@ func TestLogger_Append(t *testing.T) {
 		key := fmt.Sprintf("key%d", i)
 		value := fmt.Sprintf("value%d", i)
 		var ttl uint32 = 1000
-		entry := NewLogEntry([]byte(key), []byte(value), PUT, ttl, B_STRING, STRING)
+		entry := NewLogEntry([]byte(key), nil, []byte(value), -1, PUT, ttl, B_STRING, STRING)
 		err = log.Append(entry)
 		if err != nil {
 			t.Error(err)
@@ -53,7 +53,7 @@ func TestLogger_ReadAt(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		key := fmt.Sprintf("key%d", i)
 		value := fmt.Sprintf("value%d", i)
-		entry := NewLogEntry([]byte(key), []byte(value), PUT, ttl, B_STRING, STRING)
+		entry := NewLogEntry([]byte(key), nil, []byte(value), -1, PUT, ttl, B_STRING, STRING)
 		err = log.Append(entry)
 		if err != nil {
 			t.Error(err)

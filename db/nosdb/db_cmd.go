@@ -5,7 +5,7 @@ import "nosdb/logfile"
 /*
  * @Author: sjhuang
  * @Date: 2022-04-25 11:49:53
- * @LastEditTime: 2022-04-27 10:16:31
+ * @LastEditTime: 2022-04-28 11:12:00
  * @FilePath: /nosdb/db_cmd.go
  */
 
@@ -16,4 +16,13 @@ const (
 	// ======== set cmd ==========
 	SADD
 	SPOP
+	SREM
+
+	// ======== list cmd ==========
+	LPUSH
+	LPUSHX
+	LPOP
+	RPUSH
+	RPUSHX
+	RPOP
 )
