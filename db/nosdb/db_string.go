@@ -2,7 +2,6 @@ package nosdb
 
 import (
 	"nosdb/ds"
-	"nosdb/logfile"
 )
 
 // ======================= string ====================
@@ -28,8 +27,7 @@ func (db *NosDB) Set(key string, value []byte) {
 		str.Set(value)
 		db.strIdx.kv[key] = str
 	}
-	db.logFile.Append(logfile.NewLogEntry([]byte(key),
-		nil, value, -1, SET, logfile.Persistent, logfile.B_STRING, logfile.STRING))
+	
 }
 
 // 获取指定 key 的值。

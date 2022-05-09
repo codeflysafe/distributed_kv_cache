@@ -1,7 +1,7 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-15 20:41:59
- * @LastEditTime: 2022-04-28 11:15:32
+ * @LastEditTime: 2022-05-09 16:36:01
  * @FilePath: /nosdb/nosdb.go
  */
 package nosdb
@@ -30,9 +30,6 @@ type NosDB struct {
 	strIdx   *StringIndex
 	strOnce  sync.Once
 
-	// todo 缓存淘汰策略
-	// lru 策略
-
 	// wal 日志文件模块
 	logFile *logfile.LogFile
 	mod     file.MOD // 操作日志文件的mod
@@ -45,4 +42,9 @@ func NewNosDB() *NosDB {
 	return nil
 }
 
-
+// 写入 log 文件
+func (db *NosDB) WriteLog(key, value []byte) {
+	db.logFile.Append(logfile.NewLogEntry([]byte(key),
+		nil, value, -1, SET, logfile.Persistent, logfile.B_STRING, logfile.STRING))
+	// db.logFile.Append()
+}
