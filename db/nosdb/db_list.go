@@ -1,8 +1,14 @@
 package nosdb
 
 import (
+	"errors"
 	"fmt"
 	"nosdb/ds"
+	"nosdb/logfile"
+)
+
+var (
+	NoSuchKeyListError = errors.New("list is not exists key ")
 )
 
 // --------------------- list操作 ------------------
@@ -23,6 +29,7 @@ func (db *NosDB) LPush(key string, value []byte) {
 	db.lazyList()
 	db.listIdx.Lock()
 	defer db.listIdx.Unlock()
+	db.writeKVLog(key, value, LPUSH, logfile.LIST)
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
 		obj.LPush(value)
@@ -40,6 +47,7 @@ func (db *NosDB) LPushX(key string, value []byte) {
 	defer db.listIdx.Unlock()
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
+		db.writeKVLog(key, value, LPUSH, logfile.LIST)
 		obj.LPush(value)
 	}
 }
@@ -52,6 +60,7 @@ func (db *NosDB) LPop(key string) []byte {
 	defer db.listIdx.Unlock()
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
+		db.writeKVLog(key, nil, LPOP, logfile.LIST)
 		return obj.LPop()
 	}
 	return nil
@@ -76,6 +85,7 @@ func (db *NosDB) RPush(key string, value []byte) {
 	db.lazyList()
 	db.listIdx.Lock()
 	defer db.listIdx.Unlock()
+	db.writeKVLog(key, value, RPUSH, logfile.LIST)
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
 		obj.RPush(value)
@@ -94,6 +104,7 @@ func (db *NosDB) RPushX(key string, value []byte) {
 	defer db.listIdx.Unlock()
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
+		db.writeKVLog(key, value, RPUSH, logfile.LIST)
 		obj.RPush(value)
 	}
 }
@@ -106,6 +117,7 @@ func (db *NosDB) RPop(key string) []byte {
 	defer db.listIdx.Unlock()
 	if obj, ok := db.listIdx.kv[key]; ok {
 		// 如果存在
+		db.writeKVLog(key, nil, RPOP, logfile.LIST)
 		return obj.RPop()
 	}
 	return nil
@@ -139,6 +151,7 @@ func (db *NosDB) LLen(key string) int {
 
 // LSet 通过索引来设置元素的值。
 // 当索引参数超出范围，或对一个空列表进行 LSet 时，返回一个错误。
+// todo
 func (db *NosDB) LSet(key string, idx int, value []byte) (err error) {
 	db.lazyList()
 	db.listIdx.Lock()
@@ -192,6 +205,5 @@ func (db *NosDB) LIndex(key string, idx int) ([]byte, error) {
 		// 如果存在
 		return obj.ListSeek(idx)
 	}
-	err := fmt.Errorf(" list is not exists key %s", key)
-	return nil, err
+	return nil, NoSuchKeyListError
 }

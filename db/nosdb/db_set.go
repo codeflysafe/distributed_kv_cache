@@ -1,12 +1,15 @@
 /*
  * @Author: sjhuang
  * @Date: 2022-04-20 18:00:34
- * @LastEditTime: 2022-04-27 10:44:43
+ * @LastEditTime: 2022-05-09 17:07:28
  * @FilePath: /nosdb/db_set.go
  */
 package nosdb
 
-import "nosdb/ds"
+import (
+	"nosdb/ds"
+	"nosdb/logfile"
+)
 
 // ---------------------------------------- set --------------------------------------------------------//
 
@@ -22,6 +25,7 @@ func (db *NosDB) SAdd(key string, value []byte) {
 	db.lazySet()
 	db.setIdx.Lock()
 	defer db.setIdx.Unlock()
+	db.writeKVLog(key, value, SADD, logfile.SET)
 	member := string(value)
 	if obj, ok := db.setIdx.kv[key]; ok {
 		obj.SAdd(member, value)
@@ -59,6 +63,7 @@ func (db *NosDB) SIsMember(key string, value []byte) bool {
 
 // 移除并返回集合中的一个随机元素
 // return nil if set is not exists or empty
+// todo 日志 如何处理呢？
 func (db *NosDB) SPop(key string) []byte {
 	db.lazySet()
 	db.setIdx.Lock()
@@ -76,6 +81,7 @@ func (db *NosDB) SRem(key string, value []byte) {
 	defer db.setIdx.Unlock()
 	member := string(value)
 	if obj, ok := db.setIdx.kv[key]; ok {
+		db.writeKVLog(key, value, SREM, logfile.SET)
 		obj.SRem(member)
 	}
 }

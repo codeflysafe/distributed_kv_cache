@@ -2,6 +2,7 @@ package nosdb
 
 import (
 	"nosdb/ds"
+	"nosdb/logfile"
 )
 
 // ------------------ hash 操作 -----------------------
@@ -20,6 +21,7 @@ func (db *NosDB) HSet(key string, member string, value []byte) {
 	db.lazyHash()
 	db.hashIdx.Lock()
 	defer db.hashIdx.Unlock()
+	db.writeLog([]byte(key), []byte(member), value, -1, HSET, logfile.HASH)
 	if obj, ok := db.hashIdx.kv[key]; ok {
 		obj.HSet(member, value)
 	} else {
@@ -33,6 +35,7 @@ func (db *NosDB) HSet(key string, member string, value []byte) {
 //如果哈希表不存在，一个新的哈希表被创建并进行 HSet 操作。
 //如果字段已经存在于哈希表中，操作无效。
 //如果 key 不存在，一个新哈希表被创建并执行 HSetNx 命令。
+// todo 不知到这样如何加日志
 func (db *NosDB) HSetNx(key string, member string, value []byte) {
 	db.lazyHash()
 	db.hashIdx.Lock()
@@ -40,6 +43,7 @@ func (db *NosDB) HSetNx(key string, member string, value []byte) {
 	if obj, ok := db.hashIdx.kv[key]; ok {
 		obj.HSetNx(member, value)
 	} else {
+		// db.writeLog([]byte(key), []byte(member), value, -1, HSET, logfile.SET)
 		h := ds.NewHash()
 		h.HSet(member, value)
 		db.hashIdx.kv[key] = h
@@ -53,6 +57,7 @@ func (db *NosDB) HDel(key string, member string) {
 	db.hashIdx.Lock()
 	defer db.hashIdx.Unlock()
 	if obj, ok := db.hashIdx.kv[key]; ok {
+		db.writeLog([]byte(key), nil, nil, -1, HDEL, logfile.HASH)
 		obj.HDel(member)
 	}
 }
@@ -82,6 +87,7 @@ func (db *NosDB) HGet(key string, member string) []byte {
 
 // HIncrBy 为哈希表 key 中的指定字段 member 的整数值加上增量 offset 。
 // 返回错误，如果不存在此字段，或者为空，或者不是整数
+// todo
 func (db *NosDB) HIncrBy(key string, member string, offset int) error {
 	db.lazyHash()
 	db.hashIdx.Lock()
@@ -98,6 +104,7 @@ func (db *NosDB) HIncrBy(key string, member string, offset int) error {
 
 // HIncrByFloat 为哈希表 key 中的指定字段的浮点数值加上增量 offset 。
 // 返回错误，如果不存在此字段，或者为空，或者不是整数
+// todo
 func (db *NosDB) HIncrByFloat(key string, member string, offset float64) error {
 	db.lazyHash()
 	db.hashIdx.Lock()

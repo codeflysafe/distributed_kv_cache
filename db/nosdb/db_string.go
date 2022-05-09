@@ -2,6 +2,7 @@ package nosdb
 
 import (
 	"nosdb/ds"
+	"nosdb/logfile"
 )
 
 // ======================= string ====================
@@ -20,6 +21,7 @@ func (db *NosDB) Set(key string, value []byte) {
 	db.lazyStr()
 	db.strIdx.Lock()
 	defer db.strIdx.Unlock()
+	db.writeKVLog(key, value, SET, logfile.STRING)
 	if obj, ok := db.strIdx.kv[key]; ok {
 		obj.Set(value)
 	} else {
@@ -27,7 +29,6 @@ func (db *NosDB) Set(key string, value []byte) {
 		str.Set(value)
 		db.strIdx.kv[key] = str
 	}
-	
 }
 
 // 获取指定 key 的值。
@@ -60,6 +61,7 @@ func (db *NosDB) GetSet(key string, newVal []byte) []byte {
 	db.lazyStr()
 	db.strIdx.Lock()
 	defer db.strIdx.Unlock()
+	db.writeKVLog(key, newVal, SET, logfile.STRING)
 	if obj, ok := db.strIdx.kv[key]; ok {
 		return obj.GetSet(newVal)
 	} else {
@@ -72,12 +74,13 @@ func (db *NosDB) GetSet(key string, newVal []byte) []byte {
 }
 
 // （SET if Not eXists） 命令在指定的 key 不存在时，为 key 设置指定的值。
-// 若存在， 则不处理
+//  若存在， 则不处理
 func (db *NosDB) SetNx(key string, value []byte) {
 	db.lazyStr()
 	db.strIdx.Lock()
 	defer db.strIdx.Unlock()
 	if _, ok := db.strIdx.kv[key]; !ok {
+		db.writeKVLog(key, value, SET, logfile.STRING)
 		str := ds.NewString()
 		str.Set(value)
 		db.strIdx.kv[key] = str
@@ -97,6 +100,7 @@ func (db *NosDB) StrLen(key string) int {
 // 如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作。
 //如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。
 //本操作的值限制在 64 位(bit)有符号数字表示之内。
+// todo 日志追加写
 func (db *NosDB) IncrByInt(key string, offset int) error {
 	db.lazyStr()
 	db.strIdx.Lock()
@@ -114,6 +118,7 @@ func (db *NosDB) IncrByInt(key string, offset int) error {
 	}
 }
 
+// todo 日志追加写
 func (db *NosDB) IncrByFloat(key string, offset float64) error {
 	db.lazyStr()
 	db.strIdx.Lock()
@@ -135,6 +140,7 @@ func (db *NosDB) IncrByFloat(key string, offset float64) error {
 // 命令将指定的 value 追加到该 key 原来值（value）的末尾。
 // 如果 key 不存在， APPEND 就简单地将给定 key 设为 value
 // 就像执行 SET key value 一样。
+// todo 不知如何处理 日志
 func (db *NosDB) Append(key string, value []byte) {
 	db.lazyStr()
 	db.strIdx.Lock()
@@ -145,8 +151,9 @@ func (db *NosDB) Append(key string, value []byte) {
 		str := ds.NewString()
 		str.Set(value)
 		db.strIdx.kv[key] = str
-		return
 	}
+	// 转化为 set 指令
+	// db.writeKVLog(key, db.strIdx.kv[key].Get(), DEL, logfile.STRING)
 }
 
 // Del 删除指定 key 的value
@@ -155,6 +162,7 @@ func (db *NosDB) Del(key string) {
 	db.strIdx.Lock()
 	defer db.strIdx.Unlock()
 	if _, ok := db.strIdx.kv[key]; ok {
+		db.writeKVLog(key, nil, DEL, logfile.STRING)
 		delete(db.hashIdx.kv, key)
 	}
 }

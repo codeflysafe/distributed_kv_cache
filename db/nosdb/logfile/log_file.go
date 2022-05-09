@@ -2,6 +2,7 @@ package logfile
 
 import (
 	"fmt"
+	"nosdb/config"
 	"nosdb/file"
 	"nosdb/snowflake"
 	"nosdb/utils"
@@ -13,9 +14,12 @@ import (
 const (
 	ACTIVE_FILE_PREFIX = "active_"
 	WAL_FILE_PREFIX    = "wal_"
-	DIR_PATH           = "./log"
 	CHECKPOINT_MAX_LEN = 64
 	FILE_MAX_LENGTH    = 1 << 20
+)
+
+var (
+	DIR_PATH = config.DbDir
 )
 
 // 文件的一些 配置信息
